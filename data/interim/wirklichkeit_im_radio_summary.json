@@ -1,0 +1,9 @@
+{
+  "rows": 45,
+  "output": "/Users/dimitrigraur/Documents/KISSA/data/interim/wirklichkeit_im_radio_stuecke.csv",
+  "biographical_labels": {
+    "possible_biographical": 20,
+    "not_biographical": 17,
+    "high_confidence_biographical": 8
+  }
+}

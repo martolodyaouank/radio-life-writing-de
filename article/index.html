@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lives on Air | German Radio Biography as Data</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="page">
+      <header class="hero">
+        <p class="kicker">Computational radio studies</p>
+        <h1>Lives on Air</h1>
+        <p class="subtitle">
+          A German-first corpus of biographical radio drama, documentary feature, and sound art, explored through archive metadata and latent semantic representations.
+        </p>
+        <div class="metrics" aria-label="Corpus metrics">
+          <div><strong>1,764</strong><span>scraped records</span></div>
+          <div><strong>806</strong><span>high / medium candidates</span></div>
+          <div><strong>4,488</strong><span>text features</span></div>
+          <div><strong>7</strong><span>semantic clusters</span></div>
+        </div>
+      </header>
+
+      <section class="intro">
+        <p>
+          This project turns scattered German radio archive and programme metadata into a corpus for studying biographical radio drama, documentary feature, and sound-based life writing. It is not a final canon; it is a navigational layer for finding patterns, absences, and promising cases for close listening.
+        </p>
+        <p>
+          The pipeline combines DRA/ARD Hoerspieldatenbank, Hoerspiel und Feature, and Wirklichkeit im Radio, then models the high/medium candidate subset with TF-IDF, truncated SVD embeddings, k-means clusters, and t-SNE projection. The analysis is tuned to acoustic memory: voice, sound material, archives, testimony, family history, and the institutional forms through which radio remembers.
+        </p>
+      </section>
+
+      <section class="panel">
+        <div class="panel-text">
+          <h2>Corpus Triage</h2>
+          <p>
+            DRA supplies the historical backbone; DLF/DLF Kultur adds recent programme pages; Wirklichkeit is small but unusually rich in critical commentary. The confidence levels mark discovery quality, not scholarly certainty.
+          </p>
+        </div>
+        <figure>
+          <img src="figures/01_corpus_triage.png" alt="Stacked bars of source layers by candidate confidence" />
+        </figure>
+      </section>
+
+      <section class="panel">
+        <div class="panel-text">
+          <h2>Acoustic Memory Signals</h2>
+          <p>
+            The clearest computational gain is not just finding biographies. It is separating kinds of memory evidence: voice, sound, archive documents, political history, family/self, and diary-letter forms.
+          </p>
+        </div>
+        <figure>
+          <img src="figures/03_acoustic_memory_heatmap.png" alt="Heatmap of acoustic memory signals by source" />
+        </figure>
+      </section>
+
+      <section class="panel wide" id="semantic-map">
+        <div class="panel-text">
+          <h2>Latent Semantic Map</h2>
+          <p>
+            The semantic map embeds 806 candidate records from cleaned descriptions and metadata. The horizontal field is the latent semantic projection; the vertical axis is year, so clusters can be rotated through time. Hover a point for title, year, source, and cluster.
+          </p>
+        </div>
+        <div class="semantic-3d" data-semantic-map-3d>
+          <div class="map-toolbar">
+            <span>3D semantic field · z-axis: year <b data-year-readout>Hover a point</b></span>
+            <span class="map-count" data-visible-readout>806 shown</span>
+            <span class="map-actions">
+              <button type="button" data-reset-filters>Reset filters</button>
+              <button type="button" data-reset-map>Reset view</button>
+            </span>
+          </div>
+          <div class="map-controls" aria-label="Semantic map filters">
+            <label class="year-control">
+              <span>Years <b data-year-range-label></b></span>
+              <div class="range-pair">
+                <input type="range" data-year-min />
+                <input type="range" data-year-max />
+              </div>
+            </label>
+            <label>
+              <span>Genre</span>
+              <select data-form-filter></select>
+            </label>
+            <label>
+              <span>Source</span>
+              <select data-source-filter></select>
+            </label>
+            <label>
+              <span>Memory signal</span>
+              <select data-signal-filter></select>
+            </label>
+          </div>
+          <div class="map-clusters" data-cluster-filters aria-label="Cluster filters"></div>
+          <div class="map-canvas" aria-label="Interactive 3D semantic map"></div>
+          <div class="map-tooltip" hidden></div>
+          <div class="map-legend" aria-label="Cluster legend"></div>
+        </div>
+      </section>
+
+      <section class="grid two">
+        <article class="mini-panel">
+          <h2>Cluster Terms</h2>
+          <p>Clusters are labeled from their strongest terms, then checked against nearest exemplar works.</p>
+          <figure>
+            <img src="figures/06_cluster_terms.png" alt="Semantic cluster sizes with top terms" />
+          </figure>
+        </article>
+        <article class="mini-panel">
+          <h2>Source Mix</h2>
+          <p>Some clusters are archive-led; others are shaped by DLF web descriptions or Wirklichkeit essays.</p>
+          <figure>
+            <img src="figures/07_cluster_source_mix.png" alt="Source composition by semantic cluster" />
+          </figure>
+        </article>
+      </section>
+
+      <section class="grid two">
+        <article class="mini-panel">
+          <h2>Historical Form</h2>
+          <p>Biography is distributed across adaptation, feature, portrait, original radio play, and sound art.</p>
+          <figure>
+            <img src="figures/02_temporal_form_heatmap.png" alt="Heatmap of form families by decade" />
+          </figure>
+        </article>
+        <article class="mini-panel">
+          <h2>Cluster Profiles</h2>
+          <p>The clusters differ by acoustic-memory makeup, not only by title keywords.</p>
+          <figure>
+            <img src="figures/05_cluster_profile.png" alt="Heatmap of acoustic memory signals by semantic cluster" />
+          </figure>
+        </article>
+      </section>
+
+      <section class="panel">
+        <div class="panel-text">
+          <h2>Dramaturgical Scale</h2>
+          <p>
+            Duration is a rough proxy, but it helps distinguish compact portrait/catalogue pieces from longer documentary and autobiographical forms that invite extended memory work.
+          </p>
+        </div>
+        <figure>
+          <img src="figures/08_duration_by_cluster.png" alt="Duration distribution by semantic cluster" />
+        </figure>
+      </section>
+
+      <section class="takeaways">
+        <h2>What Is Useful Here?</h2>
+        <ul>
+          <li>The corpus is now searchable as a German radio-memory field, not just a list of scraped pages.</li>
+          <li>The latent clusters create a close-reading shortlist: diaries, letters, portraits, sound art, social documentary, and curated documentary criticism.</li>
+          <li>The method exposes where metadata is thin: DRA is historically broad, while Wirklichkeit and DLF are text-rich enough for semantic modelling.</li>
+          <li>The next serious step is to replace TF-IDF/SVD with sentence-transformer embeddings and manually review cluster exemplars.</li>
+        </ul>
+      </section>
+
+      <footer class="footer">
+        <p>
+          Dataset: <code>data/processed/german_radio_biographical_candidates.csv</code><br />
+          Semantic clusters: <code>data/processed/analysis_tables/semantic_cluster_terms.csv</code><br />
+          Exemplar shortlist: <code>data/processed/analysis_tables/semantic_cluster_exemplars.csv</code>
+        </p>
+      </footer>
+    </main>
+    <script src="vendor/three.min.js"></script>
+    <script src="semantic-map-3d-data.js"></script>
+    <script src="semantic-map-3d.js"></script>
+  </body>
+</html>

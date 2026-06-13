@@ -1,0 +1,20 @@
+{
+  "rows": 1764,
+  "columns": 85,
+  "output": "/Users/dimitrigraur/Documents/KISSA/data/processed/german_radio_biographical_candidates.csv",
+  "sources": {
+    "dra": 1386,
+    "hoerspielundfeature": 333,
+    "wirklichkeit_im_radio": 45
+  },
+  "biographical_labels": {
+    "not_biographical": 958,
+    "possible_biographical": 668,
+    "high_confidence_biographical": 138
+  },
+  "candidate_confidence": {
+    "review": 958,
+    "medium": 668,
+    "high": 138
+  }
+}

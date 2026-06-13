@@ -1,0 +1,8 @@
+{
+  "records": 4,
+  "archives": [
+    "bbc_genome",
+    "dra"
+  ],
+  "output": "/Users/dimitrigraur/Documents/KISSA/data/interim/feasibility_records.csv"
+}

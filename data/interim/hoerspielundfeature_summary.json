@@ -1,0 +1,9 @@
+{
+  "rows": 333,
+  "output": "/Users/dimitrigraur/Documents/KISSA/data/interim/hoerspielundfeature_candidates.csv",
+  "biographical_labels": {
+    "possible_biographical": 147,
+    "not_biographical": 122,
+    "high_confidence_biographical": 64
+  }
+}

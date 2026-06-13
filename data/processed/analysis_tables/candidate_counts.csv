@@ -1,0 +1,7 @@
+source_archive,candidate_confidence,biographical_label,rows
+dra,high,high_confidence_biographical,66
+dra,medium,possible_biographical,501
+hoerspielundfeature,high,high_confidence_biographical,64
+hoerspielundfeature,medium,possible_biographical,147
+wirklichkeit_im_radio,high,high_confidence_biographical,8
+wirklichkeit_im_radio,medium,possible_biographical,20

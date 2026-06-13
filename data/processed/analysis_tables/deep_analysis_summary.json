@@ -1,0 +1,68 @@
+{
+  "rows": 1764,
+  "core_rows": 806,
+  "sources": {
+    "dra": 1386,
+    "hoerspielundfeature": 333,
+    "wirklichkeit_im_radio": 45
+  },
+  "core_sources": {
+    "dra": 567,
+    "hoerspielundfeature": 211,
+    "wirklichkeit_im_radio": 28
+  },
+  "clusters": [
+    {
+      "cluster_id": 0,
+      "cluster_label": "Autobiographical lives",
+      "rows": 330,
+      "top_terms": "leben | erinnerungen | autobiographie | biographie | roman | karl | klaus | peter | michael | stefan"
+    },
+    {
+      "cluster_id": 1,
+      "cluster_label": "Social documentary lives",
+      "rows": 105,
+      "top_terms": "leben | zwischen | doku | klangkunst | menschen | tod | jetzt | geschichten | serie | viele"
+    },
+    {
+      "cluster_id": 2,
+      "cluster_label": "Curated documentary close readings",
+      "rows": 91,
+      "top_terms": "immer | nur | ihn | ende | horen | ihr | werden | jahre | stuck | will"
+    },
+    {
+      "cluster_id": 3,
+      "cluster_label": "Sound art and listening",
+      "rows": 35,
+      "top_terms": "acustica | ars acustica | ars | portrat | acustica portrat | the | benjamin | musik | hessischer | corner"
+    },
+    {
+      "cluster_id": 4,
+      "cluster_label": "Letters and correspondence",
+      "rows": 68,
+      "top_terms": "briefe | briefe briefe | mein | maria | ulrike | ddr briefe | martin | hessischer briefe | briefwechsel | hans"
+    },
+    {
+      "cluster_id": 5,
+      "cluster_label": "Portrait catalogue",
+      "rows": 87,
+      "top_terms": "portrat | portrat portrat | peter | hans | veb | thomas | karl | siegfried | van | dieter"
+    },
+    {
+      "cluster_id": 6,
+      "cluster_label": "Diaries and self-records",
+      "rows": 90,
+      "top_terms": "tagebuch | tagebuch tagebuch | andy | andy warhol | warhol | warhol tagebuch | ulrich | peter | tagebuch andy | tagebucher"
+    }
+  ],
+  "flag_rates_core": {
+    "voice": 0.1575682382133995,
+    "sound": 0.18362282878411912,
+    "archive": 0.38213399503722084,
+    "memory": 0.13027295285359802,
+    "trauma_history": 0.7952853598014888,
+    "artist_author": 0.20843672456575682,
+    "family_self": 0.5880893300248139,
+    "letters_diaries": 0.3200992555831266
+  }
+}

@@ -1,0 +1,8 @@
+cluster_id,cluster_label,top_terms,rows,dominant_source
+0,Autobiographical lives,leben | erinnerungen | autobiographie | biographie | roman | karl | klaus | peter | michael | stefan,330,dra
+1,Social documentary lives,leben | zwischen | doku | klangkunst | menschen | tod | jetzt | geschichten | serie | viele,105,hoerspielundfeature
+2,Curated documentary close readings,immer | nur | ihn | ende | horen | ihr | werden | jahre | stuck | will,91,hoerspielundfeature
+3,Sound art and listening,acustica | ars acustica | ars | portrat | acustica portrat | the | benjamin | musik | hessischer | corner,35,dra
+4,Letters and correspondence,briefe | briefe briefe | mein | maria | ulrike | ddr briefe | martin | hessischer briefe | briefwechsel | hans,68,dra
+5,Portrait catalogue,portrat | portrat portrat | peter | hans | veb | thomas | karl | siegfried | van | dieter,87,dra
+6,Diaries and self-records,tagebuch | tagebuch tagebuch | andy | andy warhol | warhol | warhol tagebuch | ulrich | peter | tagebuch andy | tagebucher,90,dra

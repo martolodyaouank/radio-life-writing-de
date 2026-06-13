@@ -1,0 +1,12 @@
+beautifulsoup4
+ipykernel
+lxml
+matplotlib
+networkx
+pandas
+pytest
+python-dotenv
+requests
+seaborn
+scikit-learn
+tqdm
