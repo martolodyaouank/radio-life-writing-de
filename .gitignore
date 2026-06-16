@@ -11,4 +11,5 @@ data/raw/**/*.json
 data/interim/*.csv
 data/interim/*.curl
 data/interim/source_card_pages/
+data/interim/source_card_translations/
 data/processed/*.csv

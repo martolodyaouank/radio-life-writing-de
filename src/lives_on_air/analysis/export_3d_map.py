@@ -158,12 +158,15 @@ def load_source_descriptions() -> dict[str, str]:
     if not SOURCE_DESCRIPTIONS.exists():
         return {}
     descriptions = pd.read_csv(SOURCE_DESCRIPTIONS).fillna("")
-    if "source_url" not in descriptions.columns or "short_description" not in descriptions.columns:
+    if "source_url" not in descriptions.columns:
+        return {}
+    description_column = "english_description" if "english_description" in descriptions.columns else "short_description"
+    if description_column not in descriptions.columns:
         return {}
     return {
-        str(row.source_url).strip(): str(getattr(row, "short_description", "")).strip()
+        str(row.source_url).strip(): str(getattr(row, description_column, "")).strip()
         for row in descriptions.itertuples()
-        if str(row.source_url).strip() and str(getattr(row, "short_description", "")).strip()
+        if str(row.source_url).strip() and str(getattr(row, description_column, "")).strip()
     }
 
 
