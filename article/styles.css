@@ -333,10 +333,15 @@ img {
   pointer-events: none;
 }
 
+.map-tooltip.is-pinned {
+  pointer-events: auto;
+}
+
 .map-tooltip strong,
 .map-tooltip span,
 .map-tooltip em,
-.map-tooltip small {
+.map-tooltip small,
+.map-tooltip a {
   display: block;
 }
 
@@ -359,6 +364,15 @@ img {
 
 .map-tooltip small {
   font-size: 0.77rem;
+}
+
+.map-tooltip a {
+  margin-top: 8px;
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .map-legend {

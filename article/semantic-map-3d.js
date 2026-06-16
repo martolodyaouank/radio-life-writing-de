@@ -99,7 +99,10 @@
   raycaster.params.Points.threshold = 1.15;
   const pointer = new THREE.Vector2();
   let hoveredIndex = -1;
+  let pinnedIndex = -1;
+  let pinnedPosition = null;
   let isDragging = false;
+  let pointerDown = null;
   let previous = { x: 0, y: 0 };
   let rotationVelocity = { x: 0.0015, y: 0.002 };
 
@@ -227,7 +230,8 @@
     });
 
     replacePointGeometry(visibleRecords);
-    setHover(-1, { clientX: 0, clientY: 0 });
+    clearPinnedCard();
+    setHover(-1, { clientX: 0, clientY: 0 }, { force: true });
     yearRangeLabel.textContent = `${minYear}-${maxYear}`;
     visibleReadout.textContent = `${visibleRecords.length.toLocaleString()} shown`;
     container.dataset.recordCount = String(records.length);
@@ -269,28 +273,67 @@
     pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
   }
 
-  function setHover(index, event) {
+  function setHover(index, event, options = {}) {
+    if (pinnedIndex >= 0 && !options.force) return;
     hoveredIndex = index;
     if (index < 0) {
       highlight.visible = false;
       tooltip.hidden = true;
+      tooltip.classList.remove("is-pinned");
       yearReadout.textContent = "Hover a point";
       return;
     }
+    renderCard(index, event, false);
+  }
+
+  function renderCard(index, event, pinned) {
+    hoveredIndex = index;
     const record = visibleRecords[index];
     if (!record) return;
     highlight.position.set(record.x, record.y, record.z);
     highlight.visible = true;
     tooltip.hidden = false;
+    tooltip.classList.toggle("is-pinned", pinned);
+    const sourceLink = sourceAnchor(record);
     tooltip.innerHTML = `
       <strong>${escapeHtml(record.title)}</strong>
       <span>${record.year || "No year"} · ${escapeHtml(record.source)} · ${escapeHtml(record.form)}</span>
       <em>${escapeHtml(record.cluster)}</em>
       <small>${escapeHtml((record.signals || []).join(", ") || "no signal tags")}</small>
+      ${sourceLink}
     `;
     const rect = container.getBoundingClientRect();
     tooltip.style.transform = `translate(${event.clientX - rect.left + 14}px, ${event.clientY - rect.top + 14}px)`;
     yearReadout.textContent = record.year ? `${record.year}` : "No year";
+  }
+
+  function togglePinnedCard(index, event) {
+    if (index < 0) {
+      clearPinnedCard();
+      setHover(-1, event, { force: true });
+      return;
+    }
+    if (pinnedIndex === index) {
+      clearPinnedCard();
+      setHover(-1, event, { force: true });
+      return;
+    }
+    pinnedIndex = index;
+    pinnedPosition = { clientX: event.clientX, clientY: event.clientY };
+    renderCard(index, pinnedPosition, true);
+  }
+
+  function clearPinnedCard() {
+    pinnedIndex = -1;
+    pinnedPosition = null;
+    tooltip.classList.remove("is-pinned");
+  }
+
+  function sourceAnchor(record) {
+    const url = String(record.url || "").trim();
+    if (!/^https?:\/\//i.test(url)) return "";
+    const label = record.source ? `Open ${record.source} source` : "Open source";
+    return `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(label)}</a>`;
   }
 
   function escapeHtml(value) {
@@ -307,6 +350,9 @@
     if (isDragging) {
       const dx = event.clientX - previous.x;
       const dy = event.clientY - previous.y;
+      if (pointerDown && Math.hypot(event.clientX - pointerDown.x, event.clientY - pointerDown.y) > 4) {
+        pointerDown.dragged = true;
+      }
       group.rotation.z += dx * 0.006;
       group.rotation.x += dy * 0.004;
       rotationVelocity = { x: dy * 0.0003, y: dx * 0.0004 };
@@ -321,19 +367,29 @@
 
   renderer.domElement.addEventListener("pointerdown", (event) => {
     isDragging = true;
+    pointerDown = { x: event.clientX, y: event.clientY, dragged: false };
     previous = { x: event.clientX, y: event.clientY };
     renderer.domElement.setPointerCapture(event.pointerId);
   });
 
   renderer.domElement.addEventListener("pointerup", (event) => {
+    const wasClick = pointerDown && !pointerDown.dragged;
     isDragging = false;
     if (renderer.domElement.hasPointerCapture(event.pointerId)) {
       renderer.domElement.releasePointerCapture(event.pointerId);
     }
+    if (wasClick) {
+      updatePointer(event);
+      raycaster.setFromCamera(pointer, camera);
+      const intersections = raycaster.intersectObject(points);
+      togglePinnedCard(intersections.length ? intersections[0].index : -1, event);
+    }
+    pointerDown = null;
   });
 
   renderer.domElement.addEventListener("pointerleave", () => {
     isDragging = false;
+    pointerDown = null;
     setHover(-1, { clientX: 0, clientY: 0 });
   });
 
@@ -355,10 +411,11 @@
   const hoverObserver = new MutationObserver(() => {
     const index = Number(container.dataset.hoverIndex ?? -1);
     const rect = container.getBoundingClientRect();
+    clearPinnedCard();
     setHover(Number.isFinite(index) ? index : -1, {
       clientX: rect.left + rect.width * 0.55,
       clientY: rect.top + 180,
-    });
+    }, { force: true });
   });
   hoverObserver.observe(container, { attributes: true, attributeFilter: ["data-hover-index"] });
 
