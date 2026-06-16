@@ -96,7 +96,9 @@
   group.add(highlight);
 
   const raycaster = new THREE.Raycaster();
-  raycaster.params.Points.threshold = 1.15;
+  const highlightBaseRadius = 1.15;
+  const cursorRadiusPixels = 7;
+  raycaster.params.Points.threshold = 0.8;
   const pointer = new THREE.Vector2();
   let hoveredIndex = -1;
   let pinnedIndex = -1;
@@ -271,10 +273,13 @@
   }
 
   function updateZoomSensitiveSizes() {
+    const height = Math.max(1, renderer.domElement.clientHeight || canvasHost.clientHeight);
     const distance = camera.position.length();
-    const scale = Math.max(0.42, Math.min(1.2, distance / initialCamera.length()));
-    highlight.scale.setScalar(scale);
-    raycaster.params.Points.threshold = Math.max(0.42, Math.min(1.15, 1.15 * scale));
+    const visibleWorldHeight = 2 * distance * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+    const worldUnitsPerPixel = visibleWorldHeight / height;
+    const cursorRadius = Math.max(0.14, Math.min(0.95, worldUnitsPerPixel * cursorRadiusPixels));
+    raycaster.params.Points.threshold = cursorRadius;
+    highlight.scale.setScalar(cursorRadius / highlightBaseRadius);
   }
 
   function updatePointer(event) {
