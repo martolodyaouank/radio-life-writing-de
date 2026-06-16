@@ -156,15 +156,14 @@ def load_subject_overrides() -> dict[str, dict[str, str]]:
 def row_text(row: object) -> str:
     fields = [
         "title",
+        "display_title",
         "genre",
         "life_signal",
         "cluster_label",
-        "creator",
-        "author",
         "description",
-        "long_description",
         "seo_description",
-        "analysis_text",
+        "image_caption",
+        "image_alt",
     ]
     return " ".join(
         str(getattr(row, field, "") or "")
@@ -196,6 +195,32 @@ def subject_tags(row: object) -> list[str]:
     return tags
 
 
+def clean_summary_text(value: str) -> str:
+    text = re.sub(r"\s+", " ", value).strip()
+    text = re.sub(r"^(Feature|Hörspiel|Archiv|Essay)\s+", "", text, flags=re.IGNORECASE)
+    text = re.sub(r"\s+Aus dem Podcast.*$", "", text, flags=re.IGNORECASE)
+    return text.strip()
+
+
+def source_summary(row: object) -> str:
+    for field in ["description", "seo_description"]:
+        value = first_value(row, [field])
+        if value:
+            return clean_summary_text(value)
+    long_description = first_value(row, ["long_description"])
+    if long_description:
+        sentences = re.split(r"(?<=[.!?])\s+", clean_summary_text(long_description))
+        useful = [
+            sentence
+            for sentence in sentences
+            if 35 <= len(sentence) <= 260
+            and not re.search(r"\b(link kopieren|audio herunterladen|produktion|länge|minuten)\b", sentence, flags=re.IGNORECASE)
+        ]
+        if useful:
+            return " ".join(useful[:2])
+    return ""
+
+
 def first_value(row: object, fields: list[str]) -> str:
     for field in fields:
         value = getattr(row, field, "")
@@ -215,6 +240,22 @@ def clean_person_list(value: str) -> str:
     return "; ".join(dict.fromkeys(names[:4]))
 
 
+def production_credit(row: object, fields: list[str]) -> str:
+    value = first_value(row, fields)
+    if value:
+        return clean_person_list(value)
+    text = first_value(row, ["long_description", "raw_text_sample"])
+    for label in fields:
+        if "director" in label or "regie" in label or "realisation" in label:
+            match = re.search(
+                r"\bRegie:\s*(.+?)(?=\s+(?:Mit:|Ton(?:\s+und\s+Technik)?:|Produktion:|Länge:)|[.;\n|]|$)",
+                text,
+            )
+            if match:
+                return clean_person_list(match.group(1))
+    return ""
+
+
 def plausible_subject(value: str) -> str:
     text = re.sub(r"\s+", " ", value).strip(" -–.,;:")
     if not text or len(text) > 72:
@@ -231,6 +272,28 @@ def plausible_subject(value: str) -> str:
 def subject_name(row: object) -> str:
     title = str(getattr(row, "title", "") or "")
     text = row_text(row)
+    display_title = str(getattr(row, "display_title", "") or "")
+    caption = " ".join(
+        first_value(row, [field])
+        for field in ["image_caption", "image_alt"]
+        if first_value(row, [field])
+    )
+    for source in [display_title, title, caption]:
+        portrait_match = re.search(
+            r"portr[aä]it\s+de[rs]\s+(?:[A-Za-zÄÖÜäöüß-]+\s+){0,4}([A-ZÄÖÜ][\wÄÖÜäöüßéÉèÈáÁàÀíÍóÓúÚçÇ.-]+(?:\s+[A-ZÄÖÜ][\wÄÖÜäöüßéÉèÈáÁàÀíÍóÓúÚçÇ.-]+){1,3})",
+            source,
+            flags=re.IGNORECASE,
+        )
+        if portrait_match:
+            subject = plausible_subject(portrait_match.group(1))
+            if subject:
+                return subject
+    hebammen_match = re.search(
+        r"Hebammen\s+([A-ZÄÖÜ][\wÄÖÜäöüßéÉèÈáÁàÀíÍóÓúÚçÇ.-]+)\s+und\s+([A-ZÄÖÜ][\wÄÖÜäöüßéÉèÈáÁàÀíÍóÓúÚçÇ.-]+)\s+und\s+deren\s+Schwester\s+([A-ZÄÖÜ][\wÄÖÜäöüßéÉèÈáÁàÀíÍóÓúÚçÇ.-]+)",
+        caption,
+    )
+    if hebammen_match:
+        return "; ".join(hebammen_match.groups())
     leading_name = re.match(
         r"^([A-ZÄÖÜ][\wÄÖÜäöüßéÉèÈáÁàÀíÍóÓúÚçÇ.-]+"
         r"(?:\s+[A-ZÄÖÜ][\wÄÖÜäöüßéÉèÈáÁàÀíÍóÓúÚçÇ.-]+){1,3})\s+[-–]\s+.*porträt",
@@ -286,6 +349,9 @@ def subject_role(row: object) -> str:
 
 
 def subject_description(row: object, subject: str, tags: list[str]) -> str:
+    summary = source_summary(row)
+    if summary:
+        return summary
     description = first_value(row, ["description", "seo_description", "long_description"])
     life_signal = str(getattr(row, "life_signal", "") or "")
     role = subject_role(row)
@@ -354,6 +420,18 @@ def main() -> None:
                 "whoAbout": who_about,
                 "whoPrimary": who_about[0],
                 "dedicatedTo": who_name,
+                "author": production_credit(row, ["authors", "creator", "author"]),
+                "director": production_credit(
+                    row,
+                    [
+                        "directors",
+                        "wir_regie",
+                        "wir_realisation",
+                        "wir_autor_und_regie",
+                        "wir_funkeinrichtung_und_regie",
+                    ],
+                ),
+                "description": override.get("short_description") or subject_description(row, who_name, who_about),
                 "subjectDescription": override.get("short_description") or subject_description(row, who_name, who_about),
                 "url": str(getattr(row, "source_url", "") or ""),
                 "x": round(safe_float(getattr(row, "map_x", 0.0)), 4),

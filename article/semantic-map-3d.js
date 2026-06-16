@@ -352,16 +352,19 @@
     tooltip.innerHTML = `
       <strong>${escapeHtml(record.title)}</strong>
       <span>${record.year || "No year"} · ${escapeHtml(record.source)} · ${escapeHtml(record.form)}</span>
-      <span>Dedicated to: ${escapeHtml(record.dedicatedTo || "Subject not identified")}</span>
-      <small>${escapeHtml(record.subjectDescription || "No short description available in the source metadata.")}</small>
-      <span>About: ${escapeHtml((record.whoAbout || []).join(", ") || "Unclear / needs review")}</span>
-      <em>${escapeHtml(record.cluster)}</em>
-      <small>${escapeHtml((record.signals || []).join(", ") || "no signal tags")}</small>
+      ${creditLine("Director", record.director)}
+      ${creditLine("Author", record.author)}
+      <small><b>Description:</b> ${escapeHtml(record.description || record.subjectDescription || "No short description available in the source metadata.")}</small>
       ${sourceLink}
     `;
     const rect = container.getBoundingClientRect();
     tooltip.style.transform = `translate(${event.clientX - rect.left + 14}px, ${event.clientY - rect.top + 14}px)`;
     yearReadout.textContent = record.year ? `${record.year}` : "No year";
+  }
+
+  function creditLine(label, value) {
+    const text = String(value || "").trim();
+    return text ? `<span>${escapeHtml(label)}: ${escapeHtml(text)}</span>` : "";
   }
 
   function togglePinnedCard(index, event) {
