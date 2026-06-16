@@ -13,6 +13,7 @@ INPUT = PROJECT_ROOT / "data" / "processed" / "analysis_tables" / "core_semantic
 OUTPUT = PROJECT_ROOT / "article" / "semantic-map-3d-data.js"
 EXCLUSIONS = PROJECT_ROOT / "data" / "curation" / "life_writing_exclusions.csv"
 SUBJECT_OVERRIDES = PROJECT_ROOT / "data" / "curation" / "life_subject_overrides.csv"
+SOURCE_DESCRIPTIONS = PROJECT_ROOT / "data" / "curation" / "source_card_descriptions.csv"
 
 
 CLUSTER_COLORS = {
@@ -150,6 +151,19 @@ def load_subject_overrides() -> dict[str, dict[str, str]]:
         }
         for row in overrides.itertuples()
         if str(row.source_url).strip()
+    }
+
+
+def load_source_descriptions() -> dict[str, str]:
+    if not SOURCE_DESCRIPTIONS.exists():
+        return {}
+    descriptions = pd.read_csv(SOURCE_DESCRIPTIONS).fillna("")
+    if "source_url" not in descriptions.columns or "short_description" not in descriptions.columns:
+        return {}
+    return {
+        str(row.source_url).strip(): str(getattr(row, "short_description", "")).strip()
+        for row in descriptions.itertuples()
+        if str(row.source_url).strip() and str(getattr(row, "short_description", "")).strip()
     }
 
 
@@ -382,6 +396,7 @@ def main() -> None:
     if excluded_urls:
         df = df[~df["source_url"].astype(str).str.strip().isin(excluded_urls)].copy()
     subject_overrides = load_subject_overrides()
+    source_descriptions = load_source_descriptions()
 
     years = pd.to_numeric(df["analysis_year"], errors="coerce")
     median_year = float(years.median())
@@ -402,10 +417,13 @@ def main() -> None:
         who_about = subject_tags(row)
         who_name = subject_name(row)
         override = subject_overrides.get(str(getattr(row, "source_url", "") or "").strip(), {})
+        source_url = str(getattr(row, "source_url", "") or "").strip()
+        source_description = source_descriptions.get(source_url, "")
         if override.get("dedicated_to"):
             who_name = override["dedicated_to"]
         if override.get("life_focus"):
             who_about = [tag.strip() for tag in override["life_focus"].split(";") if tag.strip()]
+        card_description = source_description or override.get("short_description") or subject_description(row, who_name, who_about)
         records.append(
             {
                 "title": str(getattr(row, "title", "") or "Untitled"),
@@ -431,9 +449,9 @@ def main() -> None:
                         "wir_funkeinrichtung_und_regie",
                     ],
                 ),
-                "description": override.get("short_description") or subject_description(row, who_name, who_about),
-                "subjectDescription": override.get("short_description") or subject_description(row, who_name, who_about),
-                "url": str(getattr(row, "source_url", "") or ""),
+                "description": card_description,
+                "subjectDescription": card_description,
+                "url": source_url,
                 "x": round(safe_float(getattr(row, "map_x", 0.0)), 4),
                 "y": round(safe_float(getattr(row, "map_y", 0.0)), 4),
                 "z": round(z, 4),

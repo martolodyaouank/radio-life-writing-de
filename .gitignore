@@ -9,4 +9,6 @@ __pycache__/
 data/raw/**/*.html
 data/raw/**/*.json
 data/interim/*.csv
+data/interim/*.curl
+data/interim/source_card_pages/
 data/processed/*.csv
