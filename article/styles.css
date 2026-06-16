@@ -204,7 +204,7 @@ img {
 
 .map-controls {
   display: grid;
-  grid-template-columns: minmax(210px, 1.2fr) repeat(3, minmax(132px, 0.75fr));
+  grid-template-columns: minmax(210px, 1.15fr) repeat(4, minmax(120px, 0.72fr));
   gap: 8px;
   margin-bottom: 9px;
 }
@@ -393,6 +393,31 @@ img {
   border-radius: 50%;
 }
 
+.subject-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  border: 1px solid var(--line);
+  background: var(--line);
+}
+
+.subject-summary span {
+  min-height: 74px;
+  padding: 13px 14px;
+  background: var(--paper);
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.28;
+}
+
+.subject-summary b {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--accent);
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
 .grid.two {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -433,7 +458,8 @@ code {
   .intro,
   .panel,
   .panel.wide,
-  .grid.two {
+  .grid.two,
+  .subject-summary {
     grid-template-columns: 1fr;
   }
 
@@ -451,6 +477,10 @@ code {
   }
 
   .map-controls {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .subject-summary {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 

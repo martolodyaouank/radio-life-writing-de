@@ -18,6 +18,7 @@
   const formFilter = container.querySelector("[data-form-filter]");
   const sourceFilter = container.querySelector("[data-source-filter]");
   const signalFilter = container.querySelector("[data-signal-filter]");
+  const whoFilter = container.querySelector("[data-who-filter]");
 
   const colors = payload.clusterColors || {};
   const clusters = Object.keys(colors);
@@ -157,8 +158,9 @@
     fillSelect(formFilter, "All genres", payload.forms || uniqueValues("form"));
     fillSelect(sourceFilter, "All sources", payload.sources || uniqueValues("source"));
     fillSelect(signalFilter, "All signals", payload.signals || uniqueSignals());
+    fillSelect(whoFilter, "All life focuses", payload.whoAbout || uniqueWhoAbout());
 
-    [yearMinInput, yearMaxInput, formFilter, sourceFilter, signalFilter].forEach((control) => {
+    [yearMinInput, yearMaxInput, formFilter, sourceFilter, signalFilter, whoFilter].forEach((control) => {
       control.addEventListener("input", applyFilters);
       control.addEventListener("change", applyFilters);
     });
@@ -193,6 +195,10 @@
     return Array.from(new Set(records.flatMap((record) => record.signals || []))).sort();
   }
 
+  function uniqueWhoAbout() {
+    return Array.from(new Set(records.flatMap((record) => record.whoAbout || []))).sort();
+  }
+
   function resetFilters() {
     activeClusters = new Set(allClusterSet);
     clusterFilters.querySelectorAll("[data-cluster]").forEach((button) => {
@@ -203,6 +209,7 @@
     formFilter.value = "";
     sourceFilter.value = "";
     signalFilter.value = "";
+    whoFilter.value = "";
     applyFilters();
   }
 
@@ -222,6 +229,7 @@
     const form = formFilter.value;
     const source = sourceFilter.value;
     const signal = signalFilter.value;
+    const who = whoFilter.value;
     visibleRecords = records.filter((record) => {
       const year = Number(record.year || payload.yearMin);
       return (
@@ -230,7 +238,8 @@
         activeClusters.has(record.cluster) &&
         (!form || record.form === form) &&
         (!source || record.source === source) &&
-        (!signal || (record.signals || []).includes(signal))
+        (!signal || (record.signals || []).includes(signal)) &&
+        (!who || (record.whoAbout || []).includes(who))
       );
     });
 
@@ -343,6 +352,7 @@
     tooltip.innerHTML = `
       <strong>${escapeHtml(record.title)}</strong>
       <span>${record.year || "No year"} · ${escapeHtml(record.source)} · ${escapeHtml(record.form)}</span>
+      <span>About: ${escapeHtml((record.whoAbout || []).join(", ") || "Unclear / needs review")}</span>
       <em>${escapeHtml(record.cluster)}</em>
       <small>${escapeHtml((record.signals || []).join(", ") || "no signal tags")}</small>
       ${sourceLink}
