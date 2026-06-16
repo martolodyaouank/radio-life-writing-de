@@ -352,6 +352,8 @@
     tooltip.innerHTML = `
       <strong>${escapeHtml(record.title)}</strong>
       <span>${record.year || "No year"} · ${escapeHtml(record.source)} · ${escapeHtml(record.form)}</span>
+      <span>Dedicated to: ${escapeHtml(record.dedicatedTo || "Subject not identified")}</span>
+      <small>${escapeHtml(record.subjectDescription || "No short description available in the source metadata.")}</small>
       <span>About: ${escapeHtml((record.whoAbout || []).join(", ") || "Unclear / needs review")}</span>
       <em>${escapeHtml(record.cluster)}</em>
       <small>${escapeHtml((record.signals || []).join(", ") || "no signal tags")}</small>

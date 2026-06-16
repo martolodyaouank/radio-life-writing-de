@@ -12,6 +12,7 @@ from lives_on_air.config import PROJECT_ROOT
 INPUT = PROJECT_ROOT / "data" / "processed" / "analysis_tables" / "core_semantic_enriched.csv"
 OUTPUT = PROJECT_ROOT / "article" / "semantic-map-3d-data.js"
 EXCLUSIONS = PROJECT_ROOT / "data" / "curation" / "life_writing_exclusions.csv"
+SUBJECT_OVERRIDES = PROJECT_ROOT / "data" / "curation" / "life_subject_overrides.csv"
 
 
 CLUSTER_COLORS = {
@@ -76,7 +77,7 @@ SUBJECT_PATTERNS = [
         "Political / historical figure",
         re.compile(
             r"\b(politik|politiker|politikerin|krieg|ns-|nationalsozial|holocaust|"
-            r"shoah|exil|widerstand|revolution|stasi|ddr|kolonial|prozess|verfolg)"
+            r"shoah|exil|widerstand|revolution|stasi|kolonial|prozess|verfolg)"
         ),
     ),
     (
@@ -135,6 +136,23 @@ def load_excluded_urls() -> set[str]:
     }
 
 
+def load_subject_overrides() -> dict[str, dict[str, str]]:
+    if not SUBJECT_OVERRIDES.exists():
+        return {}
+    overrides = pd.read_csv(SUBJECT_OVERRIDES).fillna("")
+    if "source_url" not in overrides.columns:
+        return {}
+    return {
+        str(row.source_url).strip(): {
+            "dedicated_to": str(getattr(row, "dedicated_to", "")).strip(),
+            "life_focus": str(getattr(row, "life_focus", "")).strip(),
+            "short_description": str(getattr(row, "short_description", "")).strip(),
+        }
+        for row in overrides.itertuples()
+        if str(row.source_url).strip()
+    }
+
+
 def row_text(row: object) -> str:
     fields = [
         "title",
@@ -178,11 +196,80 @@ def subject_tags(row: object) -> list[str]:
     return tags
 
 
+def first_value(row: object, fields: list[str]) -> str:
+    for field in fields:
+        value = getattr(row, field, "")
+        if not pd.isna(value):
+            text = str(value).strip()
+            if text:
+                return text
+    return ""
+
+
+def clean_person_list(value: str) -> str:
+    names = [name.strip() for name in re.split(r";|\s+/\s+", value) if name.strip()]
+    return "; ".join(dict.fromkeys(names[:4]))
+
+
+def subject_name(row: object) -> str:
+    title = str(getattr(row, "title", "") or "")
+    text = row_text(row)
+    patterns = [
+        r"porträt des autors ([A-ZÄÖÜ][^.,;:]+)",
+        r"porträt der autorin ([A-ZÄÖÜ][^.,;:]+)",
+        r"porträt des ([A-ZÄÖÜ][^.,;:]+)",
+        r"porträt der ([A-ZÄÖÜ][^.,;:]+)",
+        r"über ([A-ZÄÖÜ][^.,;:]+)",
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, title, flags=re.IGNORECASE)
+        if match:
+            return match.group(1).strip()
+    memory_match = re.search(r"([A-ZÄÖÜ][^.;:]+?)\s+erinnert sich", title)
+    if memory_match:
+        return memory_match.group(1).strip()
+    authors = first_value(row, ["authors", "creator", "author"])
+    life_signal = str(getattr(row, "life_signal", "") or "")
+    if authors and any(signal in life_signal for signal in ["autobiography", "biography", "diary/letters", "portrait"]):
+        return clean_person_list(authors)
+    if "lessing" in text:
+        return "Gotthold Ephraim Lessing"
+    return "Subject not identified"
+
+
+def subject_description(row: object) -> str:
+    description = first_value(row, ["description", "seo_description", "long_description"])
+    if description:
+        return re.sub(r"\s+", " ", description)[:260]
+    text = first_value(row, ["analysis_text", "raw_text_sample"])
+    if not text:
+        return "No short description available in the source metadata."
+    document_match = re.search(
+        r"((?:Briefe|Tagebuch|Schriften|Dokumente|Autobiographie)[^.]{20,220})",
+        text,
+        flags=re.IGNORECASE,
+    )
+    if document_match:
+        return re.sub(r"\s+", " ", document_match.group(1)).strip()
+    title = str(getattr(row, "title", "") or "")
+    text = text.replace(title, "", 1)
+    text = re.sub(
+        r"\b(Technische Realisierung|Regieassistenz|Regie|Weitere Mitwirkende|"
+        r"Sprecher/Sprecherin|Produktions- und Sendedaten)\b.*",
+        "",
+        text,
+        flags=re.IGNORECASE,
+    )
+    text = re.sub(r"\s+", " ", text).strip(" .")
+    return text[:260] if text else "No short description available in the source metadata."
+
+
 def main() -> None:
     df = pd.read_csv(INPUT)
     excluded_urls = load_excluded_urls()
     if excluded_urls:
         df = df[~df["source_url"].astype(str).str.strip().isin(excluded_urls)].copy()
+    subject_overrides = load_subject_overrides()
 
     years = pd.to_numeric(df["analysis_year"], errors="coerce")
     median_year = float(years.median())
@@ -201,6 +288,12 @@ def main() -> None:
             if safe_float(getattr(row, column, 0), 0) > 0
         ]
         who_about = subject_tags(row)
+        who_name = subject_name(row)
+        override = subject_overrides.get(str(getattr(row, "source_url", "") or "").strip(), {})
+        if override.get("dedicated_to"):
+            who_name = override["dedicated_to"]
+        if override.get("life_focus"):
+            who_about = [tag.strip() for tag in override["life_focus"].split(";") if tag.strip()]
         records.append(
             {
                 "title": str(getattr(row, "title", "") or "Untitled"),
@@ -214,6 +307,8 @@ def main() -> None:
                 "signals": signals,
                 "whoAbout": who_about,
                 "whoPrimary": who_about[0],
+                "dedicatedTo": who_name,
+                "subjectDescription": override.get("short_description") or subject_description(row),
                 "url": str(getattr(row, "source_url", "") or ""),
                 "x": round(safe_float(getattr(row, "map_x", 0.0)), 4),
                 "y": round(safe_float(getattr(row, "map_y", 0.0)), 4),
