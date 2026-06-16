@@ -48,7 +48,7 @@ SUBJECT_PATTERNS = [
         "Author / literary figure",
         re.compile(
             r"\b(autor|autorin|schriftsteller|schriftstellerin|dichter|dichterin|"
-            r"literat|literatur|poet|poetin|roman|tagebuch|brief|briefe|essay)"
+            r"literat|literatur|poet|poetin|essayist|essayistin)"
         ),
     ),
     (
