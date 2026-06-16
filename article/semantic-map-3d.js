@@ -103,6 +103,8 @@
   let pinnedPosition = null;
   let isDragging = false;
   let pointerDown = null;
+  let tooltipHasPointer = false;
+  let hideTooltipTimer = null;
   let previous = { x: 0, y: 0 };
   let rotationVelocity = { x: 0.0015, y: 0.002 };
 
@@ -275,6 +277,7 @@
 
   function setHover(index, event, options = {}) {
     if (pinnedIndex >= 0 && !options.force) return;
+    clearTooltipHideTimer();
     hoveredIndex = index;
     if (index < 0) {
       highlight.visible = false;
@@ -284,6 +287,22 @@
       return;
     }
     renderCard(index, event, false);
+  }
+
+  function scheduleHoverClear() {
+    if (pinnedIndex >= 0) return;
+    clearTooltipHideTimer();
+    hideTooltipTimer = window.setTimeout(() => {
+      if (!tooltipHasPointer && pinnedIndex < 0) {
+        setHover(-1, { clientX: 0, clientY: 0 }, { force: true });
+      }
+    }, 180);
+  }
+
+  function clearTooltipHideTimer() {
+    if (!hideTooltipTimer) return;
+    window.clearTimeout(hideTooltipTimer);
+    hideTooltipTimer = null;
   }
 
   function renderCard(index, event, pinned) {
@@ -333,7 +352,7 @@
     const url = String(record.url || "").trim();
     if (!/^https?:\/\//i.test(url)) return "";
     const label = record.source ? `Open ${record.source} source` : "Open source";
-    return `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(label)}</a>`;
+    return `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" data-source-link>${escapeHtml(label)}</a>`;
   }
 
   function escapeHtml(value) {
@@ -390,7 +409,29 @@
   renderer.domElement.addEventListener("pointerleave", () => {
     isDragging = false;
     pointerDown = null;
-    setHover(-1, { clientX: 0, clientY: 0 });
+    scheduleHoverClear();
+  });
+
+  tooltip.addEventListener("pointerenter", () => {
+    tooltipHasPointer = true;
+    clearTooltipHideTimer();
+  });
+
+  tooltip.addEventListener("pointerleave", () => {
+    tooltipHasPointer = false;
+    scheduleHoverClear();
+  });
+
+  tooltip.addEventListener("pointerdown", (event) => {
+    if (event.target.closest("[data-source-link]")) {
+      event.stopPropagation();
+    }
+  });
+
+  tooltip.addEventListener("click", (event) => {
+    if (event.target.closest("[data-source-link]")) {
+      event.stopPropagation();
+    }
   });
 
   renderer.domElement.addEventListener("wheel", (event) => {
