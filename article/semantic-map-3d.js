@@ -79,11 +79,11 @@
 
   let pointGeometry = new THREE.BufferGeometry();
   const material = new THREE.PointsMaterial({
-    size: 0.82,
+    size: 4.6,
     vertexColors: true,
     transparent: true,
     opacity: 0.86,
-    sizeAttenuation: true,
+    sizeAttenuation: false,
   });
   const points = new THREE.Points(pointGeometry, material);
   group.add(points);
@@ -267,6 +267,14 @@
     renderer.setSize(width, height, false);
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
+    updateZoomSensitiveSizes();
+  }
+
+  function updateZoomSensitiveSizes() {
+    const distance = camera.position.length();
+    const scale = Math.max(0.42, Math.min(1.2, distance / initialCamera.length()));
+    highlight.scale.setScalar(scale);
+    raycaster.params.Points.threshold = Math.max(0.42, Math.min(1.15, 1.15 * scale));
   }
 
   function updatePointer(event) {
@@ -440,12 +448,14 @@
     camera.position.multiplyScalar(1 + delta * 0.01);
     camera.position.clampLength(42, 140);
     camera.lookAt(0, 0, 0);
+    updateZoomSensitiveSizes();
   }, { passive: false });
 
   resetViewButton.addEventListener("click", () => {
     group.rotation.set(0, 0, 0);
     camera.position.copy(initialCamera);
     camera.lookAt(0, 0, 0);
+    updateZoomSensitiveSizes();
     rotationVelocity = { x: 0.0015, y: 0.002 };
   });
 
