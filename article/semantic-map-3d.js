@@ -104,6 +104,7 @@
   let pinnedIndex = -1;
   let pinnedPosition = null;
   let isDragging = false;
+  let dragMode = "rotate";
   let pointerDown = null;
   let tooltipHasPointer = false;
   let hideTooltipTimer = null;
@@ -282,6 +283,18 @@
     highlight.scale.setScalar(cursorRadius / highlightBaseRadius);
   }
 
+  function panMap(dx, dy) {
+    const height = Math.max(1, renderer.domElement.clientHeight || canvasHost.clientHeight);
+    const distance = camera.position.length();
+    const visibleWorldHeight = 2 * distance * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+    const worldUnitsPerPixel = visibleWorldHeight / height;
+    const right = new THREE.Vector3();
+    const up = new THREE.Vector3();
+    camera.matrixWorld.extractBasis(right, up, new THREE.Vector3());
+    group.position.addScaledVector(right, dx * worldUnitsPerPixel);
+    group.position.addScaledVector(up, -dy * worldUnitsPerPixel);
+  }
+
   function updatePointer(event) {
     const rect = renderer.domElement.getBoundingClientRect();
     pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
@@ -385,9 +398,13 @@
       if (pointerDown && Math.hypot(event.clientX - pointerDown.x, event.clientY - pointerDown.y) > 4) {
         pointerDown.dragged = true;
       }
-      group.rotation.z += dx * 0.006;
-      group.rotation.x += dy * 0.004;
-      rotationVelocity = { x: dy * 0.0003, y: dx * 0.0004 };
+      if (dragMode === "pan") {
+        panMap(dx, dy);
+      } else {
+        group.rotation.z += dx * 0.006;
+        group.rotation.x += dy * 0.004;
+        rotationVelocity = { x: dy * 0.0003, y: dx * 0.0004 };
+      }
       previous = { x: event.clientX, y: event.clientY };
       return;
     }
@@ -399,18 +416,20 @@
 
   renderer.domElement.addEventListener("pointerdown", (event) => {
     isDragging = true;
-    pointerDown = { x: event.clientX, y: event.clientY, dragged: false };
+    dragMode = event.shiftKey || event.button === 1 || event.button === 2 ? "pan" : "rotate";
+    pointerDown = { x: event.clientX, y: event.clientY, dragged: false, mode: dragMode };
     previous = { x: event.clientX, y: event.clientY };
     renderer.domElement.setPointerCapture(event.pointerId);
   });
 
   renderer.domElement.addEventListener("pointerup", (event) => {
     const wasClick = pointerDown && !pointerDown.dragged;
+    const wasRotateClick = wasClick && pointerDown.mode === "rotate";
     isDragging = false;
     if (renderer.domElement.hasPointerCapture(event.pointerId)) {
       renderer.domElement.releasePointerCapture(event.pointerId);
     }
-    if (wasClick) {
+    if (wasRotateClick) {
       updatePointer(event);
       raycaster.setFromCamera(pointer, camera);
       const intersections = raycaster.intersectObject(points);
@@ -423,6 +442,10 @@
     isDragging = false;
     pointerDown = null;
     scheduleHoverClear();
+  });
+
+  renderer.domElement.addEventListener("contextmenu", (event) => {
+    event.preventDefault();
   });
 
   tooltip.addEventListener("pointerenter", () => {
@@ -458,6 +481,7 @@
 
   resetViewButton.addEventListener("click", () => {
     group.rotation.set(0, 0, 0);
+    group.position.set(0, 0, 0);
     camera.position.copy(initialCamera);
     camera.lookAt(0, 0, 0);
     updateZoomSensitiveSizes();
