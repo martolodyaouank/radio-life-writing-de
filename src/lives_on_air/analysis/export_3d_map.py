@@ -207,61 +207,108 @@ def first_value(row: object, fields: list[str]) -> str:
 
 
 def clean_person_list(value: str) -> str:
-    names = [name.strip() for name in re.split(r";|\s+/\s+", value) if name.strip()]
+    names = [
+        re.sub(r"^(von|Von|nach|Nach|by|By)\s+", "", name.strip())
+        for name in re.split(r";|\s+/\s+", value)
+        if name.strip()
+    ]
     return "; ".join(dict.fromkeys(names[:4]))
+
+
+def plausible_subject(value: str) -> str:
+    text = re.sub(r"\s+", " ", value).strip(" -–.,;:")
+    if not text or len(text) > 72:
+        return ""
+    if re.match(r"^(der|die|das|den|dem|von|nach|mit|aus|über|ueber)\b", text, flags=re.IGNORECASE):
+        return ""
+    if any(fragment in text.casefold() for fragment in [" archiv", " hörspiel", " krimi", " doku", "?", " idee"]):
+        return ""
+    if not re.match(r"^[A-ZÄÖÜ]", text):
+        return ""
+    return text
 
 
 def subject_name(row: object) -> str:
     title = str(getattr(row, "title", "") or "")
     text = row_text(row)
+    leading_name = re.match(
+        r"^([A-ZÄÖÜ][\wÄÖÜäöüßéÉèÈáÁàÀíÍóÓúÚçÇ.-]+"
+        r"(?:\s+[A-ZÄÖÜ][\wÄÖÜäöüßéÉèÈáÁàÀíÍóÓúÚçÇ.-]+){1,3})\s+[-–]\s+.*porträt",
+        title,
+        flags=re.IGNORECASE,
+    )
+    if leading_name:
+        return plausible_subject(leading_name.group(1)) or "Subject not identified"
+    if (
+        str(getattr(row, "life_signal", "") or "") == "portrait"
+        and re.match(r"^[A-ZÄÖÜ][\wÄÖÜäöüßéÉèÈáÁàÀíÍóÓúÚçÇ.-]+(?:\s+[A-ZÄÖÜ][\wÄÖÜäöüßéÉèÈáÁàÀíÍóÓúÚçÇ.-]+){0,3}$", title)
+    ):
+        return title
     patterns = [
         r"porträt des autors ([A-ZÄÖÜ][^.,;:]+)",
         r"porträt der autorin ([A-ZÄÖÜ][^.,;:]+)",
-        r"porträt des ([A-ZÄÖÜ][^.,;:]+)",
-        r"porträt der ([A-ZÄÖÜ][^.,;:]+)",
         r"über ([A-ZÄÖÜ][^.,;:]+)",
     ]
     for pattern in patterns:
-        match = re.search(pattern, title, flags=re.IGNORECASE)
+        match = re.search(pattern, f"{title} {text}", flags=re.IGNORECASE)
         if match:
-            return match.group(1).strip()
+            subject = plausible_subject(match.group(1))
+            if subject:
+                return subject
     memory_match = re.search(r"([A-ZÄÖÜ][^.;:]+?)\s+erinnert sich", title)
     if memory_match:
-        return memory_match.group(1).strip()
+        subject = plausible_subject(memory_match.group(1))
+        if subject:
+            return subject
     authors = first_value(row, ["authors", "creator", "author"])
     life_signal = str(getattr(row, "life_signal", "") or "")
     if authors and any(signal in life_signal for signal in ["autobiography", "biography", "diary/letters", "portrait"]):
-        return clean_person_list(authors)
+        return plausible_subject(clean_person_list(authors)) or "Subject not identified"
     if "lessing" in text:
         return "Gotthold Ephraim Lessing"
     return "Subject not identified"
 
 
-def subject_description(row: object) -> str:
+def subject_role(row: object) -> str:
+    text = row_text(row)
+    role_patterns = [
+        ("composer and radio-play maker", r"komponist[^.]{0,80}hörspielmacher|hörspielmacher[^.]{0,80}komponist"),
+        ("composer", r"\bkomponist|komponistin|composer\b"),
+        ("writer", r"\bautor|autorin|schriftsteller|schriftstellerin|dichter|dichterin|writer\b"),
+        ("singer or musician", r"\bsänger|sängerin|musiker|musikerin|jazz|blues\b"),
+        ("actor or performer", r"\bschauspieler|schauspielerin|darsteller|darstellerin|performer\b"),
+        ("artist", r"\bkünstler|künstlerin|maler|malerin|bildhauer|bildhauerin|artist\b"),
+        ("scholar or intellectual", r"\bphilosoph|philosophin|wissenschaftler|wissenschaftlerin|kritiker|kritikerin\b"),
+    ]
+    for role, pattern in role_patterns:
+        if re.search(pattern, text, flags=re.IGNORECASE):
+            return role
+    return ""
+
+
+def subject_description(row: object, subject: str, tags: list[str]) -> str:
     description = first_value(row, ["description", "seo_description", "long_description"])
+    life_signal = str(getattr(row, "life_signal", "") or "")
+    role = subject_role(row)
+    if subject and subject != "Subject not identified":
+        if "diary/letters" in life_signal:
+            base = f"This record is based on letters, diaries, writings, or other self-records connected to {subject}."
+        elif "autobiography" in life_signal:
+            base = f"This record adapts autobiographical material by or about {subject}."
+        elif "biography" in life_signal:
+            base = f"This record presents biographical material about {subject}."
+        elif "portrait" in life_signal:
+            base = f"This record is a radio portrait of {subject}."
+        else:
+            base = f"This record appears to focus on {subject}."
+        if role:
+            return f"{base} The metadata identifies the subject as a {role}."
+        return base
+    if "diary/letters" in life_signal:
+        return "This record is included because the source metadata points to diary, letter, or self-record material, but the subject still needs manual identification."
     if description:
-        return re.sub(r"\s+", " ", description)[:260]
-    text = first_value(row, ["analysis_text", "raw_text_sample"])
-    if not text:
-        return "No short description available in the source metadata."
-    document_match = re.search(
-        r"((?:Briefe|Tagebuch|Schriften|Dokumente|Autobiographie)[^.]{20,220})",
-        text,
-        flags=re.IGNORECASE,
-    )
-    if document_match:
-        return re.sub(r"\s+", " ", document_match.group(1)).strip()
-    title = str(getattr(row, "title", "") or "")
-    text = text.replace(title, "", 1)
-    text = re.sub(
-        r"\b(Technische Realisierung|Regieassistenz|Regie|Weitere Mitwirkende|"
-        r"Sprecher/Sprecherin|Produktions- und Sendedaten)\b.*",
-        "",
-        text,
-        flags=re.IGNORECASE,
-    )
-    text = re.sub(r"\s+", " ", text).strip(" .")
-    return text[:260] if text else "No short description available in the source metadata."
+        return "The source description indicates a life-writing or portrait record, but the subject still needs manual identification."
+    return "The source metadata is too sparse to identify the subject reliably; this record needs manual review."
 
 
 def main() -> None:
@@ -308,7 +355,7 @@ def main() -> None:
                 "whoAbout": who_about,
                 "whoPrimary": who_about[0],
                 "dedicatedTo": who_name,
-                "subjectDescription": override.get("short_description") or subject_description(row),
+                "subjectDescription": override.get("short_description") or subject_description(row, who_name, who_about),
                 "url": str(getattr(row, "source_url", "") or ""),
                 "x": round(safe_float(getattr(row, "map_x", 0.0)), 4),
                 "y": round(safe_float(getattr(row, "map_y", 0.0)), 4),
