@@ -247,7 +247,6 @@ def subject_name(row: object) -> str:
     patterns = [
         r"porträt des autors ([A-ZÄÖÜ][^.,;:]+)",
         r"porträt der autorin ([A-ZÄÖÜ][^.,;:]+)",
-        r"über ([A-ZÄÖÜ][^.,;:]+)",
     ]
     for pattern in patterns:
         match = re.search(pattern, f"{title} {text}", flags=re.IGNORECASE)
