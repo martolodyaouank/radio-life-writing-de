@@ -20,14 +20,25 @@
   const signalFilter = container.querySelector("[data-signal-filter]");
   const whoFilter = container.querySelector("[data-who-filter]");
 
-  const colors = payload.clusterColors || {};
+  const themeClusterColors = {
+    "Autobiographical lives": "#C29A45",
+    "Social documentary lives": "#C25B72",
+    "Curated documentary close readings": "#7A8493",
+    "Sound art and listening": "#6A7F67",
+    "Letters and correspondence": "#9D8FD6",
+    "Portrait catalogue": "#3E6F8E",
+    "Diaries and self-records": "#A8734F",
+  };
+  const colors = Object.fromEntries(
+    Object.entries(payload.clusterColors || {}).map(([label, fallback]) => [label, themeClusterColors[label] || fallback])
+  );
   const clusters = Object.keys(colors);
   const allClusterSet = new Set(clusters);
   let activeClusters = new Set(clusters);
   let visibleRecords = records.slice();
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xffffff);
+  scene.background = new THREE.Color(0xfbf1ed);
 
   const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 1000);
   const initialCamera = new THREE.Vector3(0, -78, 56);
@@ -44,8 +55,8 @@
   const axes = new THREE.Group();
   group.add(axes);
 
-  const axisMaterial = new THREE.LineBasicMaterial({ color: 0xd8dde3, transparent: true, opacity: 0.9 });
-  const tickMaterial = new THREE.LineBasicMaterial({ color: 0xb8c0c8, transparent: true, opacity: 0.78 });
+  const axisMaterial = new THREE.LineBasicMaterial({ color: 0xe9c8c4, transparent: true, opacity: 0.9 });
+  const tickMaterial = new THREE.LineBasicMaterial({ color: 0xd9bdb9, transparent: true, opacity: 0.78 });
   const makeLine = (points, material = axisMaterial) => new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), material);
   axes.add(makeLine([new THREE.Vector3(-34, 0, -25), new THREE.Vector3(34, 0, -25)]));
   axes.add(makeLine([new THREE.Vector3(0, -28, -25), new THREE.Vector3(0, 28, -25)]));
@@ -60,8 +71,8 @@
     const z = yearToZ(year);
     axes.add(makeLine([new THREE.Vector3(-35.4, -28, z), new THREE.Vector3(-32.8, -28, z)], tickMaterial));
     const label = makeTextSprite(String(year), {
-      color: "#687078",
-      background: "rgba(255,255,255,0.86)",
+      color: "#515970",
+      background: "rgba(251,241,237,0.9)",
       fontSize: 34,
     });
     label.position.set(-30.8, -25.8, z);
@@ -70,8 +81,8 @@
   });
 
   const zLabel = makeTextSprite("year", {
-    color: "#254f4a",
-    background: "rgba(255,255,255,0.9)",
+    color: "#4747A1",
+    background: "rgba(251,241,237,0.92)",
     fontSize: 34,
   });
   zLabel.position.set(-30.8, -25.8, 26.5);
@@ -91,7 +102,7 @@
 
   const highlight = new THREE.Mesh(
     new THREE.SphereGeometry(1.15, 24, 16),
-    new THREE.MeshBasicMaterial({ color: 0x1f2328, transparent: true, opacity: 0.95 })
+    new THREE.MeshBasicMaterial({ color: 0x26324c, transparent: true, opacity: 0.95 })
   );
   highlight.visible = false;
   group.add(highlight);
@@ -124,7 +135,7 @@
     context.fillStyle = options.background || "rgba(255,255,255,0.82)";
     context.fillRect(0, 24, canvas.width, 76);
     context.fillStyle = options.color || "#687078";
-    context.font = `700 ${options.fontSize || 32}px Inter, Arial, sans-serif`;
+    context.font = `800 ${options.fontSize || 32}px Archivo, Arial, sans-serif`;
     context.textAlign = "center";
     context.textBaseline = "middle";
     context.fillText(text, canvas.width / 2, 63);
@@ -260,7 +271,7 @@
       positions[index * 3] = record.x;
       positions[index * 3 + 1] = record.y;
       positions[index * 3 + 2] = record.z;
-      color.set(record.color || "#65717d");
+      color.set(colors[record.cluster] || record.color || "#7A8493");
       pointColors[index * 3] = color.r;
       pointColors[index * 3 + 1] = color.g;
       pointColors[index * 3 + 2] = color.b;
