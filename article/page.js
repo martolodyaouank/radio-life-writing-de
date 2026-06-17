@@ -42,16 +42,31 @@
   function wireRadioControls(scope = document) {
     const buttons = [...scope.querySelectorAll('[data-pattern-button]')];
     const knobs = [...scope.querySelectorAll('.rotary-knob')];
+    const sliders = [...scope.querySelectorAll('.small-slider-control')];
     knobs.forEach((knob) => {
       knob.addEventListener('mouseenter', () => knob.classList.add('is-rotating'));
       knob.addEventListener('mouseleave', () => knob.classList.remove('is-rotating'));
       knob.addEventListener('focus', () => knob.classList.add('is-rotating'));
       knob.addEventListener('blur', () => knob.classList.remove('is-rotating'));
     });
+    sliders.forEach((slider) => {
+      slider.addEventListener('pointerover', () => slider.classList.add('is-sliding'));
+      slider.addEventListener('pointerout', (event) => {
+        if (!event.relatedTarget || !slider.contains(event.relatedTarget)) slider.classList.remove('is-sliding');
+      });
+      slider.addEventListener('mouseenter', () => slider.classList.add('is-sliding'));
+      slider.addEventListener('mouseleave', () => slider.classList.remove('is-sliding'));
+      slider.addEventListener('focus', () => slider.classList.add('is-sliding'));
+      slider.addEventListener('blur', () => slider.classList.remove('is-sliding'));
+    });
     buttons.forEach((button) => {
       const press = () => {
         setWavePattern(button.dataset.patternButton);
-        buttons.forEach((item) => item.classList.toggle('is-active', item === button));
+        buttons.forEach((item) => {
+          const active = item === button;
+          item.classList.toggle('is-active', active);
+          item.setAttribute('aria-pressed', active ? 'true' : 'false');
+        });
       };
       button.addEventListener('click', press);
       button.addEventListener('keydown', (event) => {

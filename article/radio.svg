@@ -12,7 +12,8 @@
   </defs>
   <style>
     .rotary-knob,
-    .radio-pattern-button {
+    .radio-pattern-button,
+    .small-slider-control {
       cursor: pointer;
       transform-box: fill-box;
       transform-origin: center;
@@ -30,21 +31,53 @@
       outline: none;
     }
 
-    .radio-pattern-button {
-      transition: transform 160ms ease, filter 160ms ease;
+    .radio-pattern-button .button-face,
+    .radio-pattern-button .button-core,
+    .radio-pattern-button .button-light {
+      transition: fill 160ms ease;
     }
 
-    .radio-pattern-button:hover,
-    .radio-pattern-button:focus {
-      transform: translateY(-6px);
-      filter: drop-shadow(0 8px 8px rgba(28, 39, 64, .18));
+    .radio-pattern-button:hover .button-face,
+    .radio-pattern-button:focus .button-face {
+      fill: #DCE7EE;
       outline: none;
     }
 
-    .radio-pattern-button.is-active,
-    .radio-pattern-button:active {
-      transform: translateY(7px);
-      filter: brightness(1.08);
+    .radio-pattern-button.is-active .button-face,
+    .radio-pattern-button:active .button-face {
+      fill: #C25B72;
+    }
+
+    .radio-pattern-button.is-active .button-core,
+    .radio-pattern-button:active .button-core {
+      fill: #FBEFEA;
+    }
+
+    .radio-pattern-button.is-active .button-light,
+    .radio-pattern-button:active .button-light {
+      fill: #26324C;
+    }
+
+    .small-slider-control .slider-thumb,
+    .small-slider-control .slider-highlight {
+      transition: transform 180ms ease, fill 180ms ease;
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+
+    .small-slider-control:hover .slider-thumb,
+    .small-slider-control:focus .slider-thumb,
+    .small-slider-control.is-sliding .slider-thumb,
+    .small-slider-control:hover .slider-highlight,
+    .small-slider-control:focus .slider-highlight,
+    .small-slider-control.is-sliding .slider-highlight {
+      transform: translateY(-10px);
+    }
+
+    .small-slider-control:hover .slider-thumb,
+    .small-slider-control:focus .slider-thumb,
+    .small-slider-control.is-sliding .slider-thumb {
+      fill: #5B789D;
     }
 
     @keyframes knob-spin {
@@ -126,22 +159,22 @@
 
   <!-- three small buttons -->
   <g class="radio-pattern-buttons">
-  <g class="radio-pattern-button is-active" data-pattern-button="broadcast" tabindex="0" role="button" aria-label="Broadcast zigzag pattern">
-    <circle cx="560" cy="555" r="26" fill="#C9D6E2"/>
-    <circle cx="560" cy="555" r="16" fill="#2B3A55"/>
-    <circle cx="560" cy="551" r="5" fill="#8FA7BF"/>
+  <g class="radio-pattern-button is-active" data-pattern-button="broadcast" tabindex="0" role="button" aria-label="Broadcast zigzag pattern" aria-pressed="true">
+    <circle class="button-face" cx="560" cy="555" r="26" fill="#C9D6E2"/>
+    <circle class="button-core" cx="560" cy="555" r="16" fill="#2B3A55"/>
+    <circle class="button-light" cx="560" cy="551" r="5" fill="#8FA7BF"/>
   </g>
 
-  <g class="radio-pattern-button" data-pattern-button="pulse" tabindex="0" role="button" aria-label="Pulse zigzag pattern">
-    <circle cx="640" cy="555" r="26" fill="#EAF0F4"/>
-    <circle cx="640" cy="555" r="16" fill="#2B3A55"/>
-    <circle cx="640" cy="551" r="5" fill="#8FA7BF"/>
+  <g class="radio-pattern-button" data-pattern-button="pulse" tabindex="0" role="button" aria-label="Pulse zigzag pattern" aria-pressed="false">
+    <circle class="button-face" cx="640" cy="555" r="26" fill="#EAF0F4"/>
+    <circle class="button-core" cx="640" cy="555" r="16" fill="#2B3A55"/>
+    <circle class="button-light" cx="640" cy="551" r="5" fill="#8FA7BF"/>
   </g>
 
-  <g class="radio-pattern-button" data-pattern-button="static" tabindex="0" role="button" aria-label="Static zigzag pattern">
-    <circle cx="720" cy="555" r="26" fill="#C9D6E2"/>
-    <circle cx="720" cy="555" r="16" fill="#2B3A55"/>
-    <circle cx="720" cy="551" r="5" fill="#8FA7BF"/>
+  <g class="radio-pattern-button" data-pattern-button="static" tabindex="0" role="button" aria-label="Static zigzag pattern" aria-pressed="false">
+    <circle class="button-face" cx="720" cy="555" r="26" fill="#C9D6E2"/>
+    <circle class="button-core" cx="720" cy="555" r="16" fill="#2B3A55"/>
+    <circle class="button-light" cx="720" cy="551" r="5" fill="#8FA7BF"/>
   </g>
   </g>
 
@@ -153,8 +186,11 @@
     <path d="M900 532 L885 580 L900 628 L915 580 Z" fill="#EAF0F4"/>
   </g>
 
-  <!-- small toggle + bar -->
-  <circle cx="555" cy="630" r="22" fill="#C9D6E2"/>
-  <rect x="544" y="608" width="22" height="44" fill="#4A6585"/>
+  <!-- small slider + bar -->
+  <g class="small-slider-control" tabindex="0" aria-label="Small slider control">
+    <circle cx="555" cy="630" r="28" fill="#C9D6E2"/>
+    <rect class="slider-thumb" x="541" y="601" width="28" height="58" rx="14" fill="#4A6585"/>
+    <rect class="slider-highlight" x="548" y="609" width="6" height="42" rx="3" fill="#6F8BAC" opacity="0.8"/>
+  </g>
   <rect x="600" y="620" width="160" height="20" rx="10" fill="#C9D6E2"/>
 </svg>
