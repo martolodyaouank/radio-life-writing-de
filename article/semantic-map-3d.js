@@ -353,6 +353,8 @@
       <strong>${escapeHtml(record.title)}</strong>
       <span>${record.year || "No year"} · ${escapeHtml(record.source)} · ${escapeHtml(record.form)}</span>
       ${creditLine("Protagonist", record.dedicatedTo)}
+      ${creditLine("Evidence", record.protagonistEvidence)}
+      ${creditLine("Confidence", record.protagonistConfidence)}
       ${creditLine("Director", record.director)}
       ${creditLine("Author", record.author)}
       <small><b>Description:</b> ${escapeHtml(record.description || record.subjectDescription || "No short description available in the source metadata.")}</small>

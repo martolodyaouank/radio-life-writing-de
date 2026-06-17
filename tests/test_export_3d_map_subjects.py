@@ -105,3 +105,47 @@ def test_subject_name_does_not_overcapture_after_named_role_subject():
     )
 
     assert subject_name(record) == "Marion Froude"
+
+
+def test_subject_name_extracts_letter_writer_not_opening_noun_phrase():
+    record = row(
+        title="Sweet Paris reloaded",
+        author='Wolf Pehlke; Alfred "23" Harth; Peter Fey',
+        authors='Wolf Pehlke; Alfred "23" Harth; Peter Fey',
+        description="The textual starting point of this musical radio piece, which is influenced by jazz and pop, are letters that the visual artist Wolf Pehlke from Paris, who was born in Sinzheim near Baden-Baden in 1955, wrote in 1979/1980.",
+    )
+
+    assert subject_name(record) == "Wolf Pehlke"
+
+
+def test_subject_name_extracts_named_opening_protagonist_before_composer_credit():
+    record = row(
+        title="Achim Freyer trifft Don Giovanni am Checkpoint Charlie",
+        author="Alvin Curran",
+        authors="Alvin Curran",
+        description="Achim Freyer has been shaping the theater world for over 50 years - as a director, painter, set and costume designer.",
+    )
+
+    assert subject_name(record) == "Achim Freyer"
+
+
+def test_subject_name_extracts_story_of_subject():
+    record = row(
+        title="Vorname Jonas",
+        author="Thomas Heise",
+        authors="Thomas Heise",
+        description="Die Geschichte von Jonas, der in einer Kleinstadt aufwächst.",
+    )
+
+    assert subject_name(record) == "Jonas"
+
+
+def test_subject_name_trims_role_phrase_before_name():
+    record = row(
+        title="Maestro der Comebacks",
+        author="Jean-Claude Kuner",
+        authors="Jean-Claude Kuner",
+        description="A portrait of Brazilian pianist and conductor João Carlos Martins, who returns after injuries.",
+    )
+
+    assert subject_name(record) == "João Carlos Martins"
