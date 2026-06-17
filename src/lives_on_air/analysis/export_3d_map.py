@@ -14,6 +14,7 @@ INPUT = PROJECT_ROOT / "data" / "processed" / "analysis_tables" / "core_semantic
 OUTPUT = PROJECT_ROOT / "article" / "semantic-map-3d-data.js"
 EXCLUSIONS = PROJECT_ROOT / "data" / "curation" / "life_writing_exclusions.csv"
 SUBJECT_OVERRIDES = PROJECT_ROOT / "data" / "curation" / "life_subject_overrides.csv"
+YEAR_OVERRIDES = PROJECT_ROOT / "data" / "curation" / "life_year_overrides.csv"
 SOURCE_DESCRIPTIONS = PROJECT_ROOT / "data" / "curation" / "source_card_descriptions.csv"
 PROTAGONIST_AUDIT = PROJECT_ROOT / "data" / "curation" / "semantic_map_protagonist_audit.csv"
 PROTAGONIST_AUDIT_HTML = PROJECT_ROOT / "article" / "protagonist-audit.html"
@@ -155,6 +156,23 @@ def load_subject_overrides() -> dict[str, dict[str, str]]:
         for row in overrides.itertuples()
         if str(row.source_url).strip()
     }
+
+
+def load_year_overrides() -> dict[str, int]:
+    if not YEAR_OVERRIDES.exists():
+        return {}
+    overrides = pd.read_csv(YEAR_OVERRIDES).fillna("")
+    if "source_url" not in overrides.columns or "year" not in overrides.columns:
+        return {}
+    result: dict[str, int] = {}
+    for row in overrides.itertuples():
+        source_url = str(row.source_url).strip()
+        if not source_url:
+            continue
+        year = safe_float(getattr(row, "year", None), math.nan)
+        if math.isfinite(year):
+            result[source_url] = int(year)
+    return result
 
 
 def load_source_descriptions() -> dict[str, str]:
@@ -1037,6 +1055,7 @@ def main() -> None:
     if excluded_urls:
         df = df[~df["source_url"].astype(str).str.strip().isin(excluded_urls)].copy()
     subject_overrides = load_subject_overrides()
+    year_overrides = load_year_overrides()
     source_descriptions = load_source_descriptions()
 
     years = pd.to_numeric(df["analysis_year"], errors="coerce")
@@ -1048,7 +1067,8 @@ def main() -> None:
     records = []
     audit_rows = []
     for row in df.itertuples():
-        year = safe_float(getattr(row, "analysis_year", None), median_year)
+        source_url = str(getattr(row, "source_url", "") or "").strip()
+        year = year_overrides.get(source_url, safe_float(getattr(row, "analysis_year", None), median_year))
         z = ((year - year_min) / year_span - 0.5) * 46
         cluster = str(getattr(row, "cluster_label", "unknown"))
         signals = [
@@ -1056,8 +1076,7 @@ def main() -> None:
             for label, column in SIGNAL_COLUMNS.items()
             if safe_float(getattr(row, column, 0), 0) > 0
         ]
-        override = subject_overrides.get(str(getattr(row, "source_url", "") or "").strip(), {})
-        source_url = str(getattr(row, "source_url", "") or "").strip()
+        override = subject_overrides.get(source_url, {})
         source_description = source_descriptions.get(source_url, "")
         who_about = subject_tags(row)
         protagonist = subject_decision(row, source_description)
