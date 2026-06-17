@@ -80,7 +80,7 @@
 
   const radioMount = document.querySelector('[data-radio-inline]');
   if (radioMount) {
-    fetch('radio.svg')
+    fetch('radio.svg?v=20260617-radio-refine')
       .then((response) => response.text())
       .then((svgText) => {
         const svg = new DOMParser().parseFromString(svgText, 'image/svg+xml').documentElement;
