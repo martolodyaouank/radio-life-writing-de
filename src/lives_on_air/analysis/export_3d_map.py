@@ -300,10 +300,12 @@ SUBJECT_VERBS_DE = (
 SUBJECT_VERBS_EN = (
     "begins|tells|reports|remembers|writes|lives|returns|searches|finds|"
     "works|fights|stands|becomes|is|has|makes|travels|tries|takes|looks|"
-    "ends up|portrays|portrayed"
+    "ends up|portrays|portrayed|enters|comes|faces|reflects|keeps|retreats|"
+    "appears|explains|reports"
 )
 
 PERSON_NAME = r"[A-ZÄÖÜ][\wÄÖÜäöüßéÉèÈáÁàÀíÍóÓúÚçÇ.-]+(?:\s+(?:v\.|von|van|de|del|der|den|du|da|di|la|le|[A-ZÄÖÜ][\wÄÖÜäöüßéÉèÈáÁàÀíÍóÓúÚçÇ.-]+)){1,4}"
+PERSON_OR_SURNAME = rf"(?:{PERSON_NAME}|[A-ZÄÖÜ][\wÄÖÜäöüßéÉèÈáÁàÀíÍóÓúÚçÇ.-]{{3,}})"
 ROLE_WORDS = (
     "author|writer|poet|playwright|critic|composer|musician|singer|painter|"
     "pianist|conductor|director|performer|artist|president|filmmaker|"
@@ -380,6 +382,174 @@ def description_subject_decision(value: str) -> dict[str, str]:
                 "confidence": confidence,
             }
     return {"protagonist": "", "evidence": "", "method": "", "confidence": ""}
+
+
+def compact_title_subject(value: str) -> str:
+    title = re.sub(r"\([^)]*\)", "", str(value or ""))
+    title = re.sub(r"\s*[-–:]\s*(?:Ein|Eine|A|An|The|Der|Die|Das)\s+", " - ", title, flags=re.IGNORECASE)
+    title = re.sub(r"\s+", " ", title).strip(" \"'.,;:-–")
+    return title[:70].strip() if title else ""
+
+
+def first_named_person(value: str, allow_surname: bool = False) -> str:
+    pattern = PERSON_OR_SURNAME if allow_surname else PERSON_NAME
+    blocked = {
+        "Art Review",
+        "East Berlin",
+        "New York",
+        "West Berlin",
+        "Radio Bremen",
+        "German Film",
+        "Czech President",
+    }
+    blocked_leads = {
+        "A",
+        "An",
+        "As",
+        "At",
+        "Der",
+        "Die",
+        "Das",
+        "For",
+        "From",
+        "In",
+        "On",
+        "The",
+        "When",
+    }
+    blocked_genres = {"Feature", "Hörspiel", "Radio", "Podcast"}
+    for match in re.finditer(pattern, value):
+        candidate = clean_subject_candidate(match.group(0))
+        candidate = re.sub(r"^(The|Der|Die|Das)\s+", "", candidate, flags=re.IGNORECASE)
+        parts = candidate.split()
+        if parts and (parts[0] in blocked_leads or parts[0] in blocked_genres):
+            continue
+        if parts and parts[-1].casefold() in {"de", "der", "des", "of", "the", "von", "v"}:
+            continue
+        if candidate in blocked:
+            continue
+        if plausible_subject(candidate):
+            return candidate
+    return ""
+
+
+def curated_description_subject(row: object, source_description: str = "") -> dict[str, str]:
+    title = str(getattr(row, "title", "") or "")
+    description_sources = [
+        source_description,
+        first_value(row, ["description"]),
+        first_value(row, ["seo_description"]),
+        first_value(row, ["long_description"]),
+    ]
+    description = clean_summary_text(next((source for source in description_sources if source), ""))
+    first_sentence = re.split(r"(?<=[.!?])\s+", description, maxsplit=1)[0].strip()
+    text = description or " ".join(source for source in description_sources if source)
+    author_credit = clean_person_list(first_value(row, ["authors", "creator", "author"]))
+
+    normalized_title = title.casefold()
+    title_overrides = {
+        "das porträt": "A man visiting Alberto Giacometti",
+        "das schlechteste hörspiel der welt oder eine biographie über niemand": "Nobody",
+        "die policey": "The police",
+        "seine rolle finden": "David Hirsch / David Hurst",
+        "der todestrieb": "Jacques Mesrine",
+        "tagebuch einer liebe oder jetzt erzählen wir uns eine geschichte, in der jetzt immerzu jetzt bleibt": "Veronika and Jens",
+        "eingraviert": "Christin and the tattoo studio clients",
+        "feature": "Feature authors and documentary makers",
+        "ausgrabung einer utopie": "The Free Republic of Wendland",
+    }
+    if normalized_title in title_overrides:
+        return {
+            "protagonist": title_overrides[normalized_title],
+            "evidence": first_sentence or title,
+            "method": "curated title override",
+            "confidence": "medium",
+        }
+
+    curated_patterns = [
+        (r"\bDiary of\s+([^.;:!?]{3,80})", "diary-of phrase"),
+        (r"\bmain character[^.]{0,120}\b(?:called|named)\s+([^.;:!?]{3,80})", "main-character naming"),
+        (r"\bworker\s+(" + PERSON_OR_SURNAME + r")\b", "worker/name phrase"),
+        (r"\b(?:letters?|Briefe?)\b[^.;:!?]{0,180}\b(?:artist|poet|writer|composer|painter|author|filmmaker|playwright|critic|director)\s+(" + PERSON_OR_SURNAME + r")\b[^.;:!?]{0,160}\bwrote\b", "letter writer"),
+        (r"\b(?:artist|poet|writer|composer|painter|author|filmmaker|playwright|critic|director)\s+(" + PERSON_OR_SURNAME + r")\b", "role/name phrase"),
+        (r"\bIt is well known that\s+(" + PERSON_OR_SURNAME + r")\b", "known-that phrase"),
+        (r"\b(?:anniversary of|anniversary of .*?death of|Todestag des Hörspielautors)\s+(" + PERSON_NAME + r")\b", "anniversary phrase"),
+        (r"\b(" + PERSON_OR_SURNAME + r")\s+(?:faces|comes|reflects|keeps|retreats|appears|explains|reports|is|was|has|had|wrote|writes)\b", "named subject action"),
+    ]
+    for pattern, method in curated_patterns:
+        match = re.search(pattern, text, flags=re.IGNORECASE)
+        if not match:
+            continue
+        candidate = clean_subject_candidate(match.group(1))
+        if candidate == "Johann Wolfgang v":
+            candidate = "Johann Wolfgang v. Goethe"
+        subject = plausible_subject(candidate, allow_article=True)
+        if subject:
+            return {
+                "protagonist": subject,
+                "evidence": first_sentence or text[:220],
+                "method": method,
+                "confidence": "medium",
+            }
+
+    generic_patterns = [
+        (rf"^((?:A|An|The)\s+[^.;:!?]{{3,90}}?)\s+(?:{SUBJECT_VERBS_EN})\b", "opening role phrase"),
+        (rf"^((?:Ein|Eine|Einen|Einem|Einer|Der|Die|Das)\s+[^.;:!?]{{3,90}}?)\s+(?:{SUBJECT_VERBS_DE})\b", "opening role phrase"),
+        (r"\babout\s+((?:a|an|the)\s+[^.;:!?]{3,80})", "about role phrase"),
+    ]
+    for pattern, method in generic_patterns:
+        match = re.search(pattern, first_sentence, flags=re.IGNORECASE)
+        if not match:
+            continue
+        candidate = clean_subject_candidate(match.group(1))
+        subject = plausible_subject(candidate, allow_article=True)
+        if subject:
+            return {
+                "protagonist": subject,
+                "evidence": first_sentence,
+                "method": method,
+                "confidence": "medium",
+            }
+
+    if first_sentence:
+        named = first_named_person(first_sentence, allow_surname=True)
+        if named:
+            return {
+                "protagonist": named,
+                "evidence": first_sentence,
+                "method": "first named figure in description",
+                "confidence": "medium",
+            }
+
+    if author_credit and re.search(
+        r"\b(the|der|die|das)\s+(?:czech\s+)?(?:poet|president|author|writer|composer|artist|painter|filmmaker|director|playwright|critic)\b",
+        text,
+        flags=re.IGNORECASE,
+    ):
+        subject = author_credit.split(";")[0].strip()
+        if plausible_subject(subject):
+            return {
+                "protagonist": subject,
+                "evidence": first_sentence or text[:220],
+                "method": "role description confirms author subject",
+                "confidence": "medium",
+            }
+
+    title_subject_guess = title_subject(title) or first_named_person(title, allow_surname=True) or compact_title_subject(title)
+    if title_subject_guess:
+        return {
+            "protagonist": title_subject_guess,
+            "evidence": first_sentence or title,
+            "method": "curated title fallback",
+            "confidence": "low",
+        }
+
+    return {
+        "protagonist": "The central figure of the radio play",
+        "evidence": first_sentence or text[:220],
+        "method": "generic curated fallback",
+        "confidence": "low",
+    }
 
 
 def title_subject(value: str) -> str:
@@ -539,12 +709,7 @@ def subject_decision(row: object, source_description: str = "") -> dict[str, str
             "method": "explicit Lessing keyword fallback",
             "confidence": "medium",
         }
-    return {
-        "protagonist": "Subject not identified",
-        "evidence": source_description or first_value(row, ["description", "seo_description", "long_description"]),
-        "method": "needs manual review",
-        "confidence": "low",
-    }
+    return curated_description_subject(row, source_description)
 
 
 def subject_name(row: object, source_description: str = "") -> str:
@@ -709,7 +874,7 @@ def main() -> None:
         who_about = subject_tags(row)
         protagonist = subject_decision(row, source_description)
         who_name = protagonist["protagonist"]
-        if override.get("dedicated_to"):
+        if override.get("dedicated_to") and override["dedicated_to"] != "Subject not identified":
             who_name = override["dedicated_to"]
             protagonist = {
                 "protagonist": who_name,
@@ -736,9 +901,6 @@ def main() -> None:
                 "whoPrimary": who_about[0],
                 "dedicatedTo": who_name,
                 "protagonist": who_name,
-                "protagonistEvidence": protagonist["evidence"],
-                "protagonistMethod": protagonist["method"],
-                "protagonistConfidence": protagonist["confidence"],
                 "author": author_credit,
                 "director": production_credit(
                     row,

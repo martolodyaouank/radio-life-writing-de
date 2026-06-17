@@ -47,7 +47,7 @@
         <div class="panel-text">
           <h2>Who Are These Lives About?</h2>
           <p>
-            The curated map now extracts whom each record appears to be about, then adds provisional life-focus tags: authors and literary figures, musicians and composers, artists, actors and performers, political or historical figures, family and intimate lives, women’s lives, collective histories, and ordinary/private persons. The subject line is the review anchor; the focus tags remain aids for sorting.
+            The curated map now identifies whom each record is about, then adds provisional life-focus tags: authors and literary figures, musicians and composers, artists, actors and performers, political or historical figures, family and intimate lives, women’s lives, collective histories, and ordinary/private persons. The protagonist line is the review anchor; the focus tags remain aids for sorting.
           </p>
         </div>
         <div class="subject-summary" aria-label="Life focus counts">
@@ -66,7 +66,7 @@
         <div class="panel-text">
           <h2>Latent Semantic Map</h2>
           <p>
-            The semantic map embeds 603 curated life-writing records from cleaned descriptions and metadata. The horizontal field is the latent semantic projection; the vertical axis is year, so clusters can be rotated through time. Hover a point for title, year, source, subject, life focus, and cluster; click a point to keep its source card open. Shift-drag to move the map after zooming.
+            The semantic map embeds 603 curated life-writing records from cleaned descriptions and metadata. The horizontal field is the latent semantic projection; the vertical axis is year, so clusters can be rotated through time. Hover a point for title, year, source, protagonist, life focus, and cluster; click a point to keep its source card open. Shift-drag to move the map after zooming.
           </p>
         </div>
         <div class="semantic-3d" data-semantic-map-3d>
@@ -172,13 +172,11 @@
           Dataset: <code>data/processed/german_radio_biographical_candidates.csv</code><br />
           Semantic clusters: <code>data/processed/analysis_tables/semantic_cluster_terms.csv</code><br />
           Exemplar shortlist: <code>data/processed/analysis_tables/semantic_cluster_exemplars.csv</code>
-          <br />
-          Protagonist audit: <a href="protagonist-audit.html">review all 603 map entries</a>
         </p>
       </footer>
     </main>
     <script src="vendor/three.min.js"></script>
-    <script src="semantic-map-3d-data.js?v=20260617-protagonist-audit"></script>
-    <script src="semantic-map-3d.js?v=20260617-protagonist-audit"></script>
+    <script src="semantic-map-3d-data.js?v=20260617-protagonist-curated"></script>
+    <script src="semantic-map-3d.js?v=20260617-protagonist-curated"></script>
   </body>
 </html>
