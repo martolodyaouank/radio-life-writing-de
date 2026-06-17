@@ -60,7 +60,7 @@
 
     .small-slider-control .slider-thumb,
     .small-slider-control .slider-highlight {
-      transition: transform 180ms ease, fill 180ms ease;
+      transition: fill 180ms ease;
       transform-box: fill-box;
       transform-origin: center;
     }
@@ -71,7 +71,7 @@
     .small-slider-control:hover .slider-highlight,
     .small-slider-control:focus .slider-highlight,
     .small-slider-control.is-sliding .slider-highlight {
-      transform: translateY(-10px);
+      animation: knob-spin 900ms cubic-bezier(.22,.61,.36,1) infinite;
     }
 
     .small-slider-control:hover .slider-thumb,
