@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 760" width="1080" height="760">
+  <defs>
+    <linearGradient id="bodyShine" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <clipPath id="bodyClip">
+      <rect x="80" y="150" width="920" height="560" rx="40"/>
+    </clipPath>
+  </defs>
+  <!-- palette: #2B3A55 dark, #4A6585 mid, #8FA7BF light, #C9D6E2 pale, #EAF0F4 highlight -->
+
+  <!-- feet -->
+  <rect x="120" y="700" width="70" height="30" rx="6" fill="#1c2740"/>
+  <rect x="890" y="700" width="70" height="30" rx="6" fill="#1c2740"/>
+
+  <!-- handle -->
+  <path d="M340 130 Q540 30 740 130 L740 175 Q540 90 340 175 Z" fill="#2B3A55"/>
+  <path d="M360 145 Q540 70 720 145 L720 165 Q540 100 360 165 Z" fill="#4A6585"/>
+
+  <!-- body -->
+  <rect x="80" y="150" width="920" height="560" rx="40" fill="#4A6585"/>
+  <rect x="80" y="150" width="920" height="560" rx="40" fill="url(#bodyShine)"/>
+  <!-- diagonal shine streaks (clipped to body) -->
+  <g clip-path="url(#bodyClip)">
+    <path d="M250 150 L420 150 L240 710 L80 710 L80 600 Z" fill="#2B3A55" opacity="0.35"/>
+    <path d="M780 150 L880 150 L720 710 L620 710 Z" fill="#2B3A55" opacity="0.25"/>
+  </g>
+
+
+  <!-- left speaker panel rounded rect -->
+  <rect x="120" y="200" width="340" height="470" rx="30" fill="#8FA7BF"/>
+  <ellipse cx="290" cy="380" rx="150" ry="170" fill="#C9D6E2"/>
+  <ellipse cx="290" cy="380" rx="135" ry="155" fill="#EAF0F4"/>
+  <!-- speaker vertical bars -->
+  <g fill="#4A6585">
+    <rect x="200" y="290" width="14" height="140" rx="6"/>
+    <rect x="225" y="275" width="14" height="170" rx="6"/>
+    <rect x="250" y="265" width="14" height="190" rx="6"/>
+    <rect x="275" y="260" width="14" height="200" rx="6"/>
+    <rect x="300" y="265" width="14" height="190" rx="6"/>
+    <rect x="325" y="275" width="14" height="170" rx="6"/>
+    <rect x="350" y="290" width="14" height="140" rx="6"/>
+  </g>
+  <!-- knob in speaker -->
+  <circle cx="290" cy="555" r="70" fill="#C9D6E2"/>
+  <circle cx="290" cy="555" r="58" fill="#8FA7BF"/>
+  <circle cx="290" cy="555" r="40" fill="#EAF0F4"/>
+  <circle cx="290" cy="555" r="22" fill="#4A6585"/>
+  <path d="M290 533 L290 577 M268 555 L312 555" stroke="#2B3A55" stroke-width="3"/>
+
+  <!-- right panel -->
+  <rect x="490" y="200" width="510" height="470" rx="20" fill="#2B3A55"/>
+
+  <!-- tuner display area -->
+  <rect x="510" y="220" width="470" height="50" rx="6" fill="#C9D6E2"/>
+  <rect x="510" y="262" width="470" height="14" fill="#4A6585"/>
+
+  <!-- speaker grille horizontal lines -->
+  <rect x="510" y="290" width="470" height="160" rx="8" fill="#8FA7BF"/>
+  <g stroke="#2B3A55" stroke-width="6" stroke-linecap="round">
+    <line x1="525" y1="310" x2="965" y2="310"/>
+    <line x1="525" y1="330" x2="965" y2="330"/>
+    <line x1="525" y1="350" x2="965" y2="350"/>
+    <line x1="525" y1="370" x2="965" y2="370"/>
+    <line x1="525" y1="390" x2="965" y2="390"/>
+    <line x1="525" y1="410" x2="965" y2="410"/>
+    <line x1="525" y1="430" x2="965" y2="430"/>
+  </g>
+
+  <!-- frequency strip -->
+  <rect x="510" y="465" width="470" height="40" rx="4" fill="#4A6585"/>
+  <g fill="#EAF0F4">
+    <circle cx="530" cy="485" r="2.5"/><circle cx="555" cy="485" r="2.5"/><circle cx="580" cy="485" r="2.5"/>
+    <circle cx="605" cy="485" r="2.5"/><circle cx="630" cy="485" r="2.5"/><circle cx="655" cy="485" r="2.5"/>
+    <circle cx="680" cy="485" r="2.5"/><circle cx="705" cy="485" r="2.5"/><circle cx="730" cy="485" r="2.5"/>
+    <circle cx="755" cy="485" r="2.5"/><circle cx="780" cy="485" r="2.5"/><circle cx="805" cy="485" r="2.5"/>
+    <circle cx="830" cy="485" r="2.5"/><circle cx="855" cy="485" r="2.5"/><circle cx="880" cy="485" r="2.5"/>
+    <circle cx="905" cy="485" r="2.5"/><circle cx="930" cy="485" r="2.5"/><circle cx="955" cy="485" r="2.5"/>
+  </g>
+
+  <!-- three small knobs -->
+  <g>
+    <circle cx="560" cy="555" r="26" fill="#C9D6E2"/>
+    <circle cx="560" cy="555" r="16" fill="#2B3A55"/>
+    <circle cx="560" cy="551" r="5" fill="#8FA7BF"/>
+
+    <circle cx="640" cy="555" r="26" fill="#EAF0F4"/>
+    <circle cx="640" cy="555" r="16" fill="#2B3A55"/>
+    <circle cx="640" cy="551" r="5" fill="#8FA7BF"/>
+
+    <circle cx="720" cy="555" r="26" fill="#C9D6E2"/>
+    <circle cx="720" cy="555" r="16" fill="#2B3A55"/>
+    <circle cx="720" cy="551" r="5" fill="#8FA7BF"/>
+  </g>
+
+  <!-- large right knob -->
+  <circle cx="900" cy="580" r="75" fill="#1c2740"/>
+  <circle cx="900" cy="580" r="60" fill="#C9D6E2"/>
+  <circle cx="900" cy="580" r="48" fill="#8FA7BF"/>
+  <path d="M900 532 L885 580 L900 628 L915 580 Z" fill="#EAF0F4"/>
+
+  <!-- small toggle + bar -->
+  <circle cx="555" cy="630" r="22" fill="#C9D6E2"/>
+  <rect x="544" y="608" width="22" height="44" fill="#4A6585"/>
+  <rect x="600" y="620" width="160" height="20" rx="10" fill="#C9D6E2"/>
+</svg>

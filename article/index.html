@@ -7,50 +7,51 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <main class="page">
-      <header class="hero">
-        <p class="kicker"><span>Computational radio studies</span></p>
-        <h1>Lives on <em>Air</em></h1>
-        <p class="subtitle">
-          A German-first corpus of biographical radio drama, documentary feature, and sound art, explored through archive metadata and latent semantic representations.
-        </p>
-        <div class="metrics" aria-label="Corpus metrics">
-          <div><strong>1,764</strong><span>scraped records</span></div>
-          <div><strong>602</strong><span>curated map entries</span></div>
-          <div><strong>4,488</strong><span>text features</span></div>
-          <div><strong>7</strong><span>semantic clusters</span></div>
+    <main>
+      <section class="hero" data-screen-label="Hero">
+        <svg class="hero-waves" aria-hidden="true" viewBox="0 0 1440 600" preserveAspectRatio="none">
+          <polyline data-wave data-mid="290" data-amp="222" data-seg="9" data-speed="1.3" data-phase="0" points="0,290" fill="none" stroke="#A6C9D7" stroke-width="13" stroke-linejoin="round" stroke-linecap="round"></polyline>
+          <polyline data-wave data-mid="300" data-amp="232" data-seg="11" data-speed="1.7" data-phase="1.5" points="0,300" fill="none" stroke="#FBEFEA" stroke-width="14" stroke-linejoin="round" stroke-linecap="round"></polyline>
+          <polyline data-wave data-mid="250" data-amp="210" data-seg="8" data-speed="2.1" data-phase="3" points="0,250" fill="none" stroke="#FFFFFF" stroke-width="9" stroke-linejoin="round" stroke-linecap="round" opacity="0.85"></polyline>
+        </svg>
+        <div class="hero-radio">
+          <img src="radio.svg" alt="Vintage radio" />
         </div>
-      </header>
-
-      <section class="intro">
-        <p>
-          This project turns scattered German radio archive and programme metadata into a corpus for studying biographical radio drama, documentary feature, and sound-based life writing. It is not a final canon; it is a navigational layer for finding patterns, absences, and promising cases for close listening.
-        </p>
-        <p>
-          The pipeline combines DRA/ARD Hoerspieldatenbank, Hoerspiel und Feature, and Wirklichkeit im Radio, then models the high/medium candidate subset with TF-IDF, truncated SVD embeddings, k-means clusters, and t-SNE projection. The analysis is tuned to acoustic memory: voice, sound material, archives, testimony, family history, and the institutional forms through which radio remembers.
-        </p>
+        <div class="hero-copy">
+          <h1>Lives on Air</h1>
+          <p>A German-first corpus of biographical radio drama, documentary feature, and sound art — explored through archive metadata and latent semantic representations.</p>
+          <div class="hero-metrics" aria-label="Corpus metrics">
+            <div><strong data-count="1764">0</strong><span>scraped records</span></div>
+            <div><strong data-count="603">0</strong><span>curated map entries</span></div>
+            <div><strong data-count="4488">0</strong><span>text features</span></div>
+            <div><strong data-count="7">0</strong><span>semantic clusters</span></div>
+          </div>
+        </div>
       </section>
 
-      <section class="panel">
-        <div class="panel-text">
-          <h2>Corpus Triage</h2>
-          <p>
-            DRA supplies the historical backbone; DLF/DLF Kultur adds recent programme pages; Wirklichkeit is small but unusually rich in critical commentary. The confidence levels mark discovery quality, not scholarly certainty.
-          </p>
+      <section class="intro section-pad" data-reveal>
+        <div>
+          <p class="lede">This project turns scattered German radio archive and programme metadata into a corpus for studying <span>biographical radio drama</span>, documentary feature, and sound-based life writing.</p>
+          <p>It is not a final canon; it is a navigational layer for finding patterns, absences, and promising cases for close listening. The pipeline combines DRA / ARD Hoerspieldatenbank, Hoerspiel und Feature, and Wirklichkeit im Radio, then models the high- and medium-confidence subset with TF-IDF, truncated SVD embeddings, k-means clusters, and t-SNE projection — tuned to acoustic memory: voice, sound material, archives, testimony, family history, and the institutional forms through which radio remembers.</p>
         </div>
-        <figure>
-          <img src="figures/01_corpus_triage.png" alt="Stacked bars of source layers by candidate confidence" />
+      </section>
+
+      <section class="graph-section section-pad" data-reveal>
+        <div class="section-copy">
+          <h2>Corpus triage</h2>
+          <p>DRA supplies the historical backbone; Hoerspiel und Feature adds recent programme pages; Wirklichkeit im Radio is small but unusually rich in critical commentary. Confidence levels mark <em>discovery quality</em>, not scholarly certainty.</p>
+        </div>
+        <figure class="graph-figure">
+          <img src="figures/01_corpus_triage.png" alt="A Working Corpus, Not a Finished Canon graph" />
         </figure>
       </section>
 
-      <section class="panel">
-        <div class="panel-text">
-          <h2>Who Are These Lives About?</h2>
-          <p>
-            The curated map now extracts whom each record appears to be about, then adds provisional life-focus tags: authors and literary figures, musicians and composers, artists, actors and performers, political or historical figures, family and intimate lives, women’s lives, collective histories, and ordinary/private persons. The subject line is the review anchor; the focus tags remain aids for sorting.
-          </p>
+      <section class="graph-section section-pad" data-reveal>
+        <div class="section-copy">
+          <h2>Who are these lives about?</h2>
+          <p>For each curated record we extract whom it appears to be about, then add provisional life-focus tags. A record can carry several — the subject line is the anchor, the tags are aids for sorting.</p>
         </div>
-        <div class="subject-summary" aria-label="Life focus counts">
+        <div class="subject-summary">
           <span><b>208</b> documentary / self-record subjects</span>
           <span><b>172</b> ordinary / private persons</span>
           <span><b>138</b> family / intimate lives</span>
@@ -62,14 +63,12 @@
         </div>
       </section>
 
-      <section class="panel wide" id="semantic-map">
-        <div class="panel-text">
-          <h2>Latent Semantic Map</h2>
-          <p>
-            The semantic map embeds 602 curated life-writing records from cleaned descriptions and metadata. The horizontal field is the latent semantic projection; the vertical axis is year, so clusters can be rotated through time. Hover a point for title, year, source, protagonist, life focus, and cluster; click a point to keep its source card open. Shift-drag to move the map after zooming.
-          </p>
+      <section class="graph-section map-section section-pad" data-reveal>
+        <div class="section-copy">
+          <h2>Latent semantic map</h2>
+          <p>603 curated life-writing records, embedded from cleaned descriptions and metadata. Each bubble is one broadcast, coloured by semantic cluster. Hover for its source card; click to pin it. Switch between the semantic field and a timeline where the vertical axis becomes year.</p>
         </div>
-        <div class="semantic-3d" data-semantic-map-3d>
+        <div class="graph-preserve semantic-3d" data-semantic-map-3d>
           <div class="map-toolbar">
             <span>3D semantic field · z-axis: year <b data-year-readout>Hover a point</b></span>
             <span class="map-count" data-visible-readout>602 shown</span>
@@ -86,22 +85,10 @@
                 <input type="range" data-year-max />
               </div>
             </label>
-            <label>
-              <span>Genre</span>
-              <select data-form-filter></select>
-            </label>
-            <label>
-              <span>Source</span>
-              <select data-source-filter></select>
-            </label>
-            <label>
-              <span>Memory signal</span>
-              <select data-signal-filter></select>
-            </label>
-            <label>
-              <span>Life focus</span>
-              <select data-who-filter></select>
-            </label>
+            <label><span>Genre</span><select data-form-filter></select></label>
+            <label><span>Source</span><select data-source-filter></select></label>
+            <label><span>Memory signal</span><select data-signal-filter></select></label>
+            <label><span>Life focus</span><select data-who-filter></select></label>
           </div>
           <div class="map-clusters" data-cluster-filters aria-label="Cluster filters"></div>
           <div class="map-canvas" aria-label="Interactive 3D semantic map"></div>
@@ -110,73 +97,73 @@
         </div>
       </section>
 
-      <section class="grid two">
-        <article class="mini-panel">
-          <h2>Cluster Terms</h2>
-          <p>Clusters are labeled from their strongest terms, then checked against nearest exemplar works.</p>
-          <figure>
-            <img src="figures/06_cluster_terms.png" alt="Semantic cluster sizes with top terms" />
-          </figure>
-        </article>
-        <article class="mini-panel">
-          <h2>Source Mix</h2>
-          <p>Some clusters are archive-led; others are shaped by DLF web descriptions or Wirklichkeit essays.</p>
-          <figure>
-            <img src="figures/07_cluster_source_mix.png" alt="Source composition by semantic cluster" />
-          </figure>
-        </article>
-      </section>
-
-      <section class="grid two">
-        <article class="mini-panel">
-          <h2>Historical Form</h2>
-          <p>Biography is distributed across adaptation, feature, portrait, original radio play, and sound art.</p>
-          <figure>
-            <img src="figures/02_temporal_form_heatmap.png" alt="Heatmap of form families by decade" />
-          </figure>
-        </article>
-        <article class="mini-panel">
-          <h2>Cluster Profiles</h2>
-          <p>The clusters differ by acoustic-memory makeup, not only by title keywords.</p>
-          <figure>
-            <img src="figures/05_cluster_profile.png" alt="Heatmap of acoustic memory signals by semantic cluster" />
-          </figure>
-        </article>
-      </section>
-
-      <section class="panel">
-        <div class="panel-text">
-          <h2>Dramaturgical Scale</h2>
-          <p>
-            Duration is a rough proxy, but it helps distinguish compact portrait/catalogue pieces from longer documentary and autobiographical forms that invite extended memory work.
-          </p>
+      <section class="graph-grid section-pad" data-reveal>
+        <div class="section-copy">
+          <h2>Cluster terms</h2>
+          <p>Clusters are labelled from their strongest terms, then checked against the nearest exemplar works. They differ by acoustic-memory makeup, not only by title keywords.</p>
         </div>
-        <figure>
-          <img src="figures/08_duration_by_cluster.png" alt="Duration distribution by semantic cluster" />
-        </figure>
+        <figure class="graph-figure"><img src="figures/06_cluster_terms.png" alt="Semantic clusters and their terms graph" /></figure>
       </section>
 
-      <section class="takeaways">
-        <h2>What Is Useful Here?</h2>
-        <ul>
-          <li>The corpus is now searchable as a German radio-memory field, not just a list of scraped pages.</li>
-          <li>The latent clusters create a close-reading shortlist: diaries, letters, portraits, sound art, social documentary, and curated documentary criticism.</li>
-          <li>The method exposes where metadata is thin: DRA is historically broad, while Wirklichkeit and DLF are text-rich enough for semantic modelling.</li>
-          <li>The next serious step is to replace TF-IDF/SVD with sentence-transformer embeddings and manually review cluster exemplars.</li>
-        </ul>
+      <section class="graph-grid two section-pad" data-reveal>
+        <article>
+          <div class="section-copy">
+            <h2>Source mix</h2>
+            <p>Some clusters are archive-led; others are shaped by DLF web descriptions or Wirklichkeit essays.</p>
+          </div>
+          <figure class="graph-figure"><img src="figures/07_cluster_source_mix.png" alt="Source mix by semantic cluster graph" /></figure>
+        </article>
+        <article>
+          <div class="section-copy">
+            <h2>Historical Form</h2>
+            <p>Biography is distributed across adaptation, feature, portrait, original radio play, and sound art.</p>
+          </div>
+          <figure class="graph-figure"><img src="figures/02_temporal_form_heatmap.png" alt="Where biography appears form families over time graph" /></figure>
+        </article>
+      </section>
+
+      <section class="graph-grid two section-pad" data-reveal>
+        <article>
+          <div class="section-copy">
+            <h2>Cluster profiles</h2>
+            <p>Share of core records flagged for each memory signal. Trauma and family dominate; voice, sound material and explicit archive references are the rarer, more deliberate moves.</p>
+          </div>
+          <figure class="graph-figure"><img src="figures/05_cluster_profile.png" alt="What each semantic cluster is made of graph" /></figure>
+        </article>
+        <article>
+          <div class="section-copy">
+            <h2>How long do lives run?</h2>
+            <p>Median running time by cluster (minutes), with the typical range. Duration is a rough proxy, but it separates compact portrait and catalogue pieces from the longer documentary and autobiographical forms that invite extended memory work.</p>
+          </div>
+          <figure class="graph-figure"><img src="figures/08_duration_by_cluster.png" alt="Dramaturgical scale by semantic cluster graph" /></figure>
+        </article>
+      </section>
+
+      <section class="takeaways" data-reveal>
+        <div>
+          <h2>What is useful here</h2>
+          <div class="takeaway-grid">
+            <div><strong>01</strong><p>The corpus is now searchable as a German radio-memory <em>field</em>, not just a list of scraped pages.</p></div>
+            <div><strong>02</strong><p>The latent clusters create a close-reading shortlist: diaries, letters, portraits, sound art, social documentary, and curated criticism.</p></div>
+            <div><strong>03</strong><p>The method exposes where metadata is thin — DRA is historically broad, while Wirklichkeit and DLF are text-rich enough for semantic modelling.</p></div>
+            <div><strong>04</strong><p>The next serious step is to replace TF-IDF / SVD with sentence-transformer embeddings and manually review cluster exemplars.</p></div>
+          </div>
+        </div>
       </section>
 
       <footer class="footer">
-        <p>
-          Built and maintained by <a href="https://github.com/martolodyaouank">martolodyaouank</a><br />
-          Dataset: <code>data/processed/german_radio_biographical_candidates.csv</code><br />
-          Semantic clusters: <code>data/processed/analysis_tables/semantic_cluster_terms.csv</code><br />
-          Exemplar shortlist: <code>data/processed/analysis_tables/semantic_cluster_exemplars.csv</code>
-        </p>
+        <div>
+          <strong>Lives on Air</strong>
+          <p>Built and maintained by <a href="https://github.com/martolodyaouank">martolodyaouank</a><br />Dataset · german_radio_biographical_candidates.csv<br />Clusters · semantic_cluster_terms.csv</p>
+        </div>
+        <div class="eq" aria-hidden="true">
+          <span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
       </footer>
     </main>
     <script src="vendor/three.min.js"></script>
     <script src="semantic-map-3d-data.js?v=20260617-first-broadcast-curation"></script>
     <script src="semantic-map-3d.js?v=20260617-first-broadcast-curation"></script>
+    <script src="page.js"></script>
   </body>
 </html>
