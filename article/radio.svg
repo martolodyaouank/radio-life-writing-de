@@ -19,15 +19,10 @@
       transform-origin: center;
     }
 
-    .rotary-knob {
-      transition: filter 180ms ease;
-    }
-
     .rotary-knob:hover,
     .rotary-knob:focus,
     .rotary-knob.is-rotating {
       animation: knob-spin 900ms cubic-bezier(.22,.61,.36,1) infinite;
-      filter: drop-shadow(0 12px 12px rgba(28, 39, 64, .18));
       outline: none;
     }
 
