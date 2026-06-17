@@ -17,7 +17,8 @@ main{overflow-x:hidden}
 .hero{position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:clamp(30px,5vw,70px) clamp(20px,5vw,60px) clamp(40px,6vw,80px);text-align:center;overflow:hidden;background:#F6D7D1}
 .hero-waves{position:absolute;top:0;left:0;width:100%;height:78%;pointer-events:none;z-index:1}
 .hero-radio{position:relative;z-index:3;margin-top:clamp(60px,12vw,170px);margin-bottom:clamp(56px,10vw,140px);display:flex;justify-content:center;width:100%}
-.hero-radio img{width:clamp(280px,44vw,580px);border:0;background:transparent}
+.hero-radio img,.hero-radio svg{display:block;width:clamp(280px,44vw,580px);border:0;background:transparent}
+.hero-radio svg{height:auto;overflow:visible}
 .hero-copy{position:relative;z-index:2;max-width:920px}
 .hero h1{font-family:'Archivo',sans-serif;font-weight:800;font-size:clamp(52px,10vw,132px);line-height:.95;letter-spacing:-.025em;color:#26324C;margin:0}
 .hero-copy>p{font-family:'Newsreader',Georgia,serif;font-size:clamp(18px,2vw,26px);line-height:1.5;max-width:640px;margin:clamp(20px,2.4vw,30px) auto 0;color:#3F4860}

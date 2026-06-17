@@ -1,10 +1,82 @@
 (() => {
-  const lines = [...document.querySelectorAll('[data-wave]')].map((el) => {
-    const seg = +el.dataset.seg;
+  const wavePatterns = {
+    broadcast: [
+      { amp: 222, seg: 9, speed: 1.3 },
+      { amp: 232, seg: 11, speed: 1.7 },
+      { amp: 210, seg: 8, speed: 2.1 },
+    ],
+    pulse: [
+      { amp: 260, seg: 6, speed: 1.05 },
+      { amp: 170, seg: 14, speed: 2.45 },
+      { amp: 245, seg: 10, speed: 1.8 },
+    ],
+    static: [
+      { amp: 125, seg: 22, speed: 3.35 },
+      { amp: 265, seg: 17, speed: 2.9 },
+      { amp: 95, seg: 26, speed: 4.1 },
+    ],
+  };
+
+  function randomEnvelope(seg) {
     const rand = [];
     for (let i = 0; i <= seg; i++) rand.push(0.35 + Math.random() * 0.65);
-    return { el, seg, mid: +el.dataset.mid, amp: +el.dataset.amp, speed: +el.dataset.speed, phase: +el.dataset.phase, rand };
+    return rand;
+  }
+
+  const lines = [...document.querySelectorAll('[data-wave]')].map((el) => {
+    const seg = +el.dataset.seg;
+    return { el, seg, mid: +el.dataset.mid, amp: +el.dataset.amp, speed: +el.dataset.speed, phase: +el.dataset.phase, rand: randomEnvelope(seg) };
   });
+
+  function setWavePattern(name) {
+    const pattern = wavePatterns[name] || wavePatterns.broadcast;
+    lines.forEach((line, index) => {
+      const next = pattern[index % pattern.length];
+      line.amp = next.amp;
+      line.seg = next.seg;
+      line.speed = next.speed;
+      line.rand = randomEnvelope(next.seg);
+    });
+  }
+
+  function wireRadioControls(scope = document) {
+    const buttons = [...scope.querySelectorAll('[data-pattern-button]')];
+    const knobs = [...scope.querySelectorAll('.rotary-knob')];
+    knobs.forEach((knob) => {
+      knob.addEventListener('mouseenter', () => knob.classList.add('is-rotating'));
+      knob.addEventListener('mouseleave', () => knob.classList.remove('is-rotating'));
+      knob.addEventListener('focus', () => knob.classList.add('is-rotating'));
+      knob.addEventListener('blur', () => knob.classList.remove('is-rotating'));
+    });
+    buttons.forEach((button) => {
+      const press = () => {
+        setWavePattern(button.dataset.patternButton);
+        buttons.forEach((item) => item.classList.toggle('is-active', item === button));
+      };
+      button.addEventListener('click', press);
+      button.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          press();
+        }
+      });
+    });
+  }
+
+  const radioMount = document.querySelector('[data-radio-inline]');
+  if (radioMount) {
+    fetch('radio.svg')
+      .then((response) => response.text())
+      .then((svgText) => {
+        const svg = new DOMParser().parseFromString(svgText, 'image/svg+xml').documentElement;
+        svg.removeAttribute('width');
+        svg.removeAttribute('height');
+        radioMount.replaceChildren(svg);
+        wireRadioControls(radioMount);
+      })
+      .catch(() => wireRadioControls());
+  }
+
   const t0 = performance.now();
   function tick(now) {
     const t = (now - t0) / 1000;
