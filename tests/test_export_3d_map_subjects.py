@@ -162,6 +162,28 @@ def test_subject_name_keeps_fictional_autobiography_with_character():
     assert subject_name(record) == "Tristram"
 
 
+def test_subject_name_expands_first_name_from_author_credit():
+    record = row(
+        title="Deiner fernen Wüste Trauer",
+        author="Maria Wolkonskaja",
+        authors="Maria Wolkonskaja",
+        description="The travelers: 21-year-old Princess Maria Wolkonskaya with her stubborn maid. With her luggage, Maria has little more than memories.",
+    )
+
+    assert subject_name(record) == "Maria Wolkonskaja"
+
+
+def test_subject_name_expands_first_name_from_description():
+    record = row(
+        title="Fanny",
+        author="Heidi Knoblich",
+        authors="Heidi Knoblich",
+        description="On February 25, 1881, Fanny Mayer followed her brother's call for help in Basel and came to the Feldberg.",
+    )
+
+    assert subject_name(record) == "Fanny Mayer"
+
+
 def test_subject_name_extracts_story_of_subject():
     record = row(
         title="Vorname Jonas",

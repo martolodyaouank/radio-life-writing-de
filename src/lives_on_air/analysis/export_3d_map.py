@@ -330,6 +330,27 @@ FICTIONAL_AUTOBIOGRAPHY_TERMS = re.compile(
     r"Marco Pflaumbaum|Mr\.?\s+Molander|Dschaudar's mother)\b",
     re.IGNORECASE,
 )
+CURATED_TITLE_SUBJECT_OVERRIDES = {
+    '"nachwort eines zauberers" nach dem hörspiel \'cagliostro - porträt eines schriftstellers\' von karl richard tschon': "Cagliostro",
+    "(schreibt auf. unsere haut.) - projekt raf": "Combat Zones",
+    "1918 abschied": "People in Europe in 1918",
+    "aus den erinnerungen des zauberferkels adalbert": "Adalbert",
+    "briefe an mathilda": "Mathilda",
+    "chemie der erinnerungen": "Prof. Hegewald",
+    "das geheimnis der gelben tapete": "Emilia, Henriette, and their family",
+    "das porträt": "A man visiting Alberto Giacometti",
+    "das schlechteste hörspiel der welt oder eine biographie über niemand": "Nobody",
+    "die policey": "The police",
+    "dschaudars abenteuer": "Dschaudar's mother",
+    "familienpackung": "Johann Christoph",
+    "marienbader briefe": "Johann Wolfgang v. Goethe",
+    "pioniere der radiokunst (9. folge: ... \"quer zum betrieb der kulturindustrie\")": "Ernst Schoen",
+    "polar": "Moments and gestures in cinema",
+    "porträt eines nachmittags": "A silent man waiting for his train",
+    "warum vergessen wir dinge?": "Forgetting and memory",
+    "worpsweder tagebuch": "Alfred Behrens",
+    "von herren und knechten": "Mr. Fecht",
+}
 
 
 def clean_subject_candidate(value: str) -> str:
@@ -356,7 +377,10 @@ def clean_subject_candidate(value: str) -> str:
     ):
         candidate = re.split(r"\s+(?:from|aus)\b", candidate, maxsplit=1, flags=re.IGNORECASE)[0]
     candidate = re.sub(r"\s*\([^)]*\).*$", "", candidate)
-    return re.sub(r"\s+", " ", candidate).strip()
+    candidate = re.sub(r"\s+", " ", candidate).strip(" …")
+    if not re.search(r"\b[A-ZÄÖÜ]\.$", candidate):
+        candidate = candidate.rstrip(".")
+    return candidate
 
 
 def clean_author_subject(value: str) -> str:
@@ -366,6 +390,81 @@ def clean_author_subject(value: str) -> str:
     candidate = candidate.split(";")[0].strip()
     candidate = re.sub(r"^(Von|By)\s+", "", candidate).strip()
     return plausible_subject(candidate)
+
+
+def expanded_first_name_subject(row: object, source_description: str, subject: str) -> str:
+    if not re.fullmatch(r"[A-ZÄÖÜ][\wÄÖÜäöüßéÉèÈáÁàÀíÍóÓúÚçÇ-]{2,}", subject):
+        return ""
+    author_subject = clean_author_subject(first_value(row, ["authors", "creator", "author"]))
+    if author_subject and author_subject.split()[0] == subject and len(author_subject.split()) > 1:
+        return author_subject
+    text = " ".join(
+        source
+        for source in [
+            source_description,
+            first_value(row, ["description"]),
+            first_value(row, ["seo_description"]),
+            first_value(row, ["long_description"]),
+        ]
+        if source
+    )
+    match = re.search(
+        rf"\b{re.escape(subject)}\s+([A-ZÄÖÜ][\wÄÖÜäöüßéÉèÈáÁàÀíÍóÓúÚçÇ-]{{2,}}(?:\s+[A-ZÄÖÜ][\wÄÖÜäöüßéÉèÈáÁàÀíÍóÓúÚçÇ-]{{2,}}){{0,2}})\b",
+        text,
+    )
+    if not match:
+        return ""
+    expanded = f"{subject} {match.group(1)}"
+    return plausible_subject(expanded)
+
+
+def finalize_subject_decision(row: object, source_description: str, decision: dict[str, str]) -> dict[str, str]:
+    description_text = " ".join(
+        source
+        for source in [
+            source_description,
+            first_value(row, ["description"]),
+            first_value(row, ["seo_description"]),
+            first_value(row, ["long_description"]),
+        ]
+        if source
+    )
+    if str(getattr(row, "title", "") or "").casefold() == "erinnerungen":
+        if description_text.startswith("Learn more"):
+            return {
+                **decision,
+                "protagonist": "The Bremen Town Musicians reception",
+                "method": "curated description override",
+                "confidence": "medium",
+            }
+        if description_text.startswith("A small town somewhere in Germany"):
+            return {
+                **decision,
+                "protagonist": "A small German town",
+                "method": "curated description override",
+                "confidence": "medium",
+            }
+    title_override = CURATED_TITLE_SUBJECT_OVERRIDES.get(str(getattr(row, "title", "") or "").casefold())
+    if title_override and (
+        not decision.get("protagonist")
+        or decision["protagonist"] in {"Dear Mr", "Epilogue", "Frankfurt", "Germany", "Learn", "There", "This", "With", "Worpswede"}
+        or decision["protagonist"].endswith((".", "..."))
+    ):
+        return {
+            **decision,
+            "protagonist": title_override,
+            "method": "curated title override",
+            "confidence": "medium",
+        }
+    expanded = expanded_first_name_subject(row, source_description, decision.get("protagonist", ""))
+    if not expanded or expanded == decision.get("protagonist"):
+        return decision
+    return {
+        **decision,
+        "protagonist": expanded,
+        "method": f"{decision.get('method', 'subject')} + full-name expansion",
+        "confidence": "high" if decision.get("confidence") == "high" else "medium",
+    }
 
 
 def autobiographical_author_decision(row: object, source_description: str = "") -> dict[str, str]:
@@ -466,6 +565,7 @@ def first_named_person(value: str, allow_surname: bool = False) -> str:
     pattern = PERSON_OR_SURNAME if allow_surname else PERSON_NAME
     blocked = {
         "Art Review",
+        "Dear Mr",
         "East Berlin",
         "New York",
         "West Berlin",
@@ -473,6 +573,15 @@ def first_named_person(value: str, allow_surname: bool = False) -> str:
         "German Film",
         "Czech President",
         "Contrary",
+        "Epilogue",
+        "Europe",
+        "Frankfurt",
+        "Germany",
+        "Learn",
+        "There",
+        "This",
+        "With",
+        "Worpswede",
     }
     blocked_leads = {
         "A",
@@ -520,18 +629,14 @@ def curated_description_subject(row: object, source_description: str = "") -> di
 
     normalized_title = title.casefold()
     title_overrides = {
-        "das porträt": "A man visiting Alberto Giacometti",
-        "das schlechteste hörspiel der welt oder eine biographie über niemand": "Nobody",
-        "die policey": "The police",
-        "familienpackung": "Johann Christoph",
-        "dschaudars abenteuer": "Dschaudar's mother",
         "seine rolle finden": "David Hirsch / David Hurst",
         "der todestrieb": "Jacques Mesrine",
-        "der landstörzerin courasche abenteurlich leben": "Courasche",
         "tagebuch einer liebe oder jetzt erzählen wir uns eine geschichte, in der jetzt immerzu jetzt bleibt": "Veronika and Jens",
         "eingraviert": "Christin and the tattoo studio clients",
         "feature": "Feature authors and documentary makers",
         "ausgrabung einer utopie": "The Free Republic of Wendland",
+        "der landstörzerin courasche abenteurlich leben": "Courasche",
+        **CURATED_TITLE_SUBJECT_OVERRIDES,
     }
     if normalized_title in title_overrides:
         return {
@@ -676,7 +781,7 @@ def credit_subject_if_in_text(row: object, source_description: str = "") -> str:
     return ""
 
 
-def subject_decision(row: object, source_description: str = "") -> dict[str, str]:
+def raw_subject_decision(row: object, source_description: str = "") -> dict[str, str]:
     title = str(getattr(row, "title", "") or "")
     text = row_text(row)
     display_title = str(getattr(row, "display_title", "") or "")
@@ -789,6 +894,10 @@ def subject_decision(row: object, source_description: str = "") -> dict[str, str
             "confidence": "medium",
         }
     return curated_description_subject(row, source_description)
+
+
+def subject_decision(row: object, source_description: str = "") -> dict[str, str]:
+    return finalize_subject_decision(row, source_description, raw_subject_decision(row, source_description))
 
 
 def subject_name(row: object, source_description: str = "") -> str:
