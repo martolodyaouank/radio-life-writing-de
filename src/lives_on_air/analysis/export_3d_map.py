@@ -273,11 +273,14 @@ def production_credit(row: object, fields: list[str]) -> str:
     return ""
 
 
-def plausible_subject(value: str) -> str:
+def plausible_subject(value: str, allow_article: bool = False) -> str:
     text = re.sub(r"\s+", " ", value).strip(" -–.,;:")
     if not text or len(text) > 72:
         return ""
-    if re.match(r"^(der|die|das|den|dem|von|nach|mit|aus|über|ueber)\b", text, flags=re.IGNORECASE):
+    blocked_leads = "von|nach|mit|aus|über|ueber"
+    if not allow_article:
+        blocked_leads = f"der|die|das|den|dem|ein|eine|einen|einem|einer|a|an|the|{blocked_leads}"
+    if re.match(rf"^({blocked_leads})\b", text, flags=re.IGNORECASE):
         return ""
     if any(fragment in text.casefold() for fragment in [" archiv", " hörspiel", " krimi", " doku", "?", " idee"]):
         return ""
@@ -286,7 +289,113 @@ def plausible_subject(value: str) -> str:
     return text
 
 
-def subject_name(row: object) -> str:
+SUBJECT_VERBS_DE = (
+    "beginnt|erzählt|erzaehlt|berichtet|erinnert|schreibt|lebt|wohnt|kehrt|"
+    "sucht|findet|arbeitet|kämpft|kaempft|steht|wird|ist|hat|macht|reist|"
+    "versucht|nimmt"
+)
+SUBJECT_VERBS_EN = (
+    "begins|tells|reports|remembers|writes|lives|returns|searches|finds|"
+    "works|fights|stands|becomes|is|has|makes|travels|tries|takes|looks|"
+    "ends up|portrays|portrayed"
+)
+
+PERSON_NAME = r"[A-ZÄÖÜ][\wÄÖÜäöüßéÉèÈáÁàÀíÍóÓúÚçÇ.-]+(?:\s+(?:v\.|von|van|de|del|der|den|du|da|di|la|le|[A-ZÄÖÜ][\wÄÖÜäöüßéÉèÈáÁàÀíÍóÓúÚçÇ.-]+)){1,4}"
+ROLE_WORDS = (
+    "author|writer|poet|playwright|critic|composer|musician|singer|painter|"
+    "artist|actor|actress|director|philosopher|scholar|student|emigrant|"
+    "Autor|Autorin|Schriftsteller|Schriftstellerin|Dichter|Dichterin|"
+    "Komponist|Komponistin|Musiker|Musikerin|Sänger|Sängerin|Maler|Malerin|"
+    "Künstler|Künstlerin|Schauspieler|Schauspielerin|Regisseur|Regisseurin|"
+    "Philosoph|Philosophin|Student|Studentin|Emigrant|Emigrantin|Dramatiker|"
+    "Dramatikerin|Kritiker|Kritikerin"
+)
+ROLE_CHAIN = rf"(?:{ROLE_WORDS})(?:(?:,\s*|\s+and\s+|\s+und\s+)(?:{ROLE_WORDS}))*"
+
+
+def description_subject(value: str) -> str:
+    text = clean_summary_text(value)
+    if not text:
+        return ""
+    first_sentence = re.split(r"(?<=[.!?])\s+", text, maxsplit=1)[0].strip()
+    patterns = [
+        (rf"^(?:Als|When)\s+({PERSON_NAME})\b", 0),
+        (rf"^({PERSON_NAME}),\s+(?:alias|geb\.|geboren|born|once|who|die|der)\b", 0),
+        (rf"^({PERSON_NAME})\s+(?:war|was|ist|is)\b", 0),
+        (rf"^(?:The|the|Der|der|Die|die|Das|das)\s+{ROLE_CHAIN}\s+({PERSON_NAME})\b", 0),
+        (r"^(?:The life of|Das Leben des|Das Leben der)\s+([^.;:!?]{3,90})", re.IGNORECASE),
+        (rf"^((?:Ein|Eine|Einen|Einem|Einer)\s+[^.;:!?]{{3,90}}?)\s+(?:{SUBJECT_VERBS_DE})\b", re.IGNORECASE),
+        (rf"^((?:A|An|The)\s+[^.;:!?]{{3,90}}?)\s+(?:{SUBJECT_VERBS_EN})\b", re.IGNORECASE),
+        (rf"\b(?:Porträt|porträt|Portrait|portrait)\s+(?:des|der|of)\s+(?:the\s+)?(?:{ROLE_CHAIN}\s+)?({PERSON_NAME}|[^.;:!?]{{3,90}})", 0),
+        (r"\b(?:über|ueber|about)\s+([^.;:!?]{3,90})", re.IGNORECASE),
+        (r"\b(?:focuses on|follows|porträtiert|portraitiert)\s+([^.;:!?]{3,90})", re.IGNORECASE),
+    ]
+    for pattern, flags in patterns:
+        match = re.search(pattern, first_sentence, flags=flags)
+        if not match:
+            continue
+        candidate = re.sub(
+            rf"\s+(?:{SUBJECT_VERBS_DE}|{SUBJECT_VERBS_EN})\b.*$",
+            "",
+            match.group(1),
+            flags=re.IGNORECASE,
+        )
+        candidate = re.sub(r"\s+(?:up to|bis zu|until|bis)\b.*$", "", candidate, flags=re.IGNORECASE)
+        subject = plausible_subject(candidate, allow_article=True)
+        if subject:
+            return subject
+    return ""
+
+
+def title_subject(value: str) -> str:
+    title = str(value or "").strip()
+    case_sensitive_patterns = [
+        r"^([A-ZÄÖÜ][\wÄÖÜäöüßéÉèÈáÁàÀíÍóÓúÚçÇ.-]+(?:\s+[A-ZÄÖÜ][\wÄÖÜäöüßéÉèÈáÁàÀíÍóÓúÚçÇ.-]+){1,3})\s+[-–]",
+    ]
+    case_insensitive_patterns = [
+        r"\bDas Leben des\s+([A-ZÄÖÜ][^()/:;,]+)",
+        r"\bDas Leben der\s+([A-ZÄÖÜ][^()/:;,]+)",
+        r"\bThe life of\s+([A-Z][^()/:;,]+)",
+    ]
+    for pattern in case_sensitive_patterns:
+        match = re.search(pattern, title)
+        if match:
+            subject = plausible_subject(match.group(1))
+            if subject:
+                return subject
+    for pattern in case_insensitive_patterns:
+        match = re.search(pattern, title, flags=re.IGNORECASE)
+        if match:
+            subject = plausible_subject(match.group(1))
+            if subject:
+                return subject
+    return ""
+
+
+def credit_subject_if_in_text(row: object, source_description: str = "") -> str:
+    credit = plausible_subject(clean_person_list(first_value(row, ["authors", "creator", "author"])))
+    if not credit:
+        return ""
+    haystack = " ".join(
+        source
+        for source in [
+            str(getattr(row, "title", "") or ""),
+            str(getattr(row, "display_title", "") or ""),
+            source_description,
+            first_value(row, ["description"]),
+            first_value(row, ["seo_description"]),
+            first_value(row, ["long_description"]),
+        ]
+        if source
+    ).casefold()
+    credit_parts = [part.strip() for part in credit.split(";") if part.strip()]
+    mentioned_parts = [part for part in credit_parts if part.casefold() in haystack]
+    if mentioned_parts:
+        return "; ".join(mentioned_parts)
+    return ""
+
+
+def subject_name(row: object, source_description: str = "") -> str:
     title = str(getattr(row, "title", "") or "")
     text = row_text(row)
     display_title = str(getattr(row, "display_title", "") or "")
@@ -305,6 +414,18 @@ def subject_name(row: object) -> str:
             subject = plausible_subject(portrait_match.group(1))
             if subject:
                 return subject
+    title_match = title_subject(title)
+    if title_match:
+        return title_match
+    for source in [
+        source_description,
+        first_value(row, ["description"]),
+        first_value(row, ["seo_description"]),
+        first_value(row, ["long_description"]),
+    ]:
+        subject = description_subject(source)
+        if subject:
+            return subject
     hebammen_match = re.search(
         r"Hebammen\s+([A-ZÄÖÜ][\wÄÖÜäöüßéÉèÈáÁàÀíÍóÓúÚçÇ.-]+)\s+und\s+([A-ZÄÖÜ][\wÄÖÜäöüßéÉèÈáÁàÀíÍóÓúÚçÇ.-]+)\s+und\s+deren\s+Schwester\s+([A-ZÄÖÜ][\wÄÖÜäöüßéÉèÈáÁàÀíÍóÓúÚçÇ.-]+)",
         caption,
@@ -339,10 +460,9 @@ def subject_name(row: object) -> str:
         subject = plausible_subject(memory_match.group(1))
         if subject:
             return subject
-    authors = first_value(row, ["authors", "creator", "author"])
-    life_signal = str(getattr(row, "life_signal", "") or "")
-    if authors and any(signal in life_signal for signal in ["autobiography", "biography", "diary/letters", "portrait"]):
-        return plausible_subject(clean_person_list(authors)) or "Subject not identified"
+    credit_subject = credit_subject_if_in_text(row, source_description)
+    if credit_subject:
+        return credit_subject
     if "lessing" in text:
         return "Gotthold Ephraim Lessing"
     return "Subject not identified"
@@ -418,10 +538,10 @@ def main() -> None:
             if safe_float(getattr(row, column, 0), 0) > 0
         ]
         who_about = subject_tags(row)
-        who_name = subject_name(row)
         override = subject_overrides.get(str(getattr(row, "source_url", "") or "").strip(), {})
         source_url = str(getattr(row, "source_url", "") or "").strip()
         source_description = source_descriptions.get(source_url, "")
+        who_name = subject_name(row, source_description)
         if override.get("dedicated_to"):
             who_name = override["dedicated_to"]
         if override.get("life_focus"):
