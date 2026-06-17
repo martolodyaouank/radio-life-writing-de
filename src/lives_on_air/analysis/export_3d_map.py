@@ -301,7 +301,7 @@ SUBJECT_VERBS_EN = (
     "begins|tells|reports|remembers|writes|lives|returns|searches|finds|"
     "works|fights|stands|becomes|is|has|makes|travels|tries|takes|looks|"
     "ends up|portrays|portrayed|enters|comes|faces|reflects|keeps|retreats|"
-    "appears|explains|reports"
+    "appears|explains|reports|dissects"
 )
 
 PERSON_NAME = r"[A-ZÄÖÜ][\wÄÖÜäöüßéÉèÈáÁàÀíÍóÓúÚçÇ.-]+(?:\s+(?:v\.|von|van|de|del|der|den|du|da|di|la|le|[A-ZÄÖÜ][\wÄÖÜäöüßéÉèÈáÁàÀíÍóÓúÚçÇ.-]+)){1,4}"
@@ -320,9 +320,25 @@ ROLE_WORDS = (
 ROLE_CHAIN = rf"(?:{ROLE_WORDS})(?:(?:,\s*|\s+and\s+|\s+und\s+)(?:{ROLE_WORDS}))*"
 ROLE_PHRASE = rf"(?:(?:[A-Za-zÄÖÜäöüß-]+\s+){{0,4}}{ROLE_CHAIN}\s+)?"
 ROLE_PHRASE_REQUIRED = rf"(?:[A-Za-zÄÖÜäöüß-]+\s+){{0,4}}{ROLE_CHAIN}\s+"
+AUTOBIOGRAPHICAL_TERMS = re.compile(
+    r"\b(autobiograph\w*|autobiography|memoirs?|diary excerpts|self-reflections|"
+    r"from my diary|aus meinem tagebuch)\b",
+    re.IGNORECASE,
+)
+FICTIONAL_AUTOBIOGRAPHY_TERMS = re.compile(
+    r"\b(fictional autobiography|main character would|title hero|"
+    r"Marco Pflaumbaum|Mr\.?\s+Molander|Dschaudar's mother)\b",
+    re.IGNORECASE,
+)
 
 
 def clean_subject_candidate(value: str) -> str:
+    value = re.sub(
+        r"^(?:British experimental musician|Swiss writer|composer|the composer|the writer|the author)\s+",
+        "",
+        value,
+        flags=re.IGNORECASE,
+    )
     candidate = re.sub(
         rf"\s+(?:{SUBJECT_VERBS_DE}|{SUBJECT_VERBS_EN})\b.*$",
         "",
@@ -330,6 +346,7 @@ def clean_subject_candidate(value: str) -> str:
         flags=re.IGNORECASE,
     )
     candidate = re.sub(r"\s+who\b.*$", "", candidate, flags=re.IGNORECASE)
+    candidate = re.sub(r"\s+was\s+published\b.*$", "", candidate, flags=re.IGNORECASE)
     if not re.match(r"^(Ein|Eine|Einen|Einem|Einer|A|An|The)\b", candidate):
         candidate = re.sub(r"\s+(?:die|der|das)\b.*$", "", candidate, flags=re.IGNORECASE)
     candidate = re.sub(r"\s+(?:up to|bis zu|until|bis)\b.*$", "", candidate, flags=re.IGNORECASE)
@@ -340,6 +357,60 @@ def clean_subject_candidate(value: str) -> str:
         candidate = re.split(r"\s+(?:from|aus)\b", candidate, maxsplit=1, flags=re.IGNORECASE)[0]
     candidate = re.sub(r"\s*\([^)]*\).*$", "", candidate)
     return re.sub(r"\s+", " ", candidate).strip()
+
+
+def clean_author_subject(value: str) -> str:
+    candidate = clean_person_list(value)
+    if not candidate or any(marker in candidate.casefold() for marker in [":", "bearbeitung", "regie", "text adaptation"]):
+        return ""
+    candidate = candidate.split(";")[0].strip()
+    candidate = re.sub(r"^(Von|By)\s+", "", candidate).strip()
+    return plausible_subject(candidate)
+
+
+def autobiographical_author_decision(row: object, source_description: str = "") -> dict[str, str]:
+    sources = [
+        source_description,
+        first_value(row, ["description"]),
+        first_value(row, ["seo_description"]),
+        first_value(row, ["long_description"]),
+    ]
+    text = clean_summary_text(next((source for source in sources if source), ""))
+    if not text or not AUTOBIOGRAPHICAL_TERMS.search(text) or FICTIONAL_AUTOBIOGRAPHY_TERMS.search(text):
+        return {"protagonist": "", "evidence": "", "method": "", "confidence": ""}
+
+    first_sentence = re.split(r"(?<=[.!?])\s+", text, maxsplit=1)[0].strip()
+    patterns = [
+        rf"\b(?:poet|writer|composer|musician|author|farm worker|Swiss writer|experimental musician)\s+({PERSON_NAME})\b",
+        rf"\b({PERSON_NAME})['’]s\s+(?:radio work|autobiograph\w*|moving autobiography)",
+        rf"\b({PERSON_NAME})\s+(?:dissects|reports|tells|wrote|published|looks back)\b",
+        rf"\bby\s+(?:the\s+)?(?:composer|writer|author|musician)?\s*({PERSON_NAME})\b",
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, text, flags=re.IGNORECASE)
+        if not match:
+            continue
+        subject = plausible_subject(clean_subject_candidate(match.group(1)))
+        if subject in {"This"}:
+            subject = clean_author_subject(first_value(row, ["authors", "creator", "author"]))
+        if subject:
+            return {
+                "protagonist": subject,
+                "evidence": first_sentence or text[:220],
+                "method": "autobiographical description names author",
+                "confidence": "high",
+            }
+
+    subject = clean_author_subject(first_value(row, ["authors", "creator", "author"]))
+    if subject:
+        return {
+            "protagonist": subject,
+            "evidence": first_sentence or text[:220],
+            "method": "autobiographical description uses author",
+            "confidence": "high",
+        }
+
+    return {"protagonist": "", "evidence": "", "method": "", "confidence": ""}
 
 
 def description_subject(value: str) -> str:
@@ -401,6 +472,7 @@ def first_named_person(value: str, allow_surname: bool = False) -> str:
         "Radio Bremen",
         "German Film",
         "Czech President",
+        "Contrary",
     }
     blocked_leads = {
         "A",
@@ -451,8 +523,11 @@ def curated_description_subject(row: object, source_description: str = "") -> di
         "das porträt": "A man visiting Alberto Giacometti",
         "das schlechteste hörspiel der welt oder eine biographie über niemand": "Nobody",
         "die policey": "The police",
+        "familienpackung": "Johann Christoph",
+        "dschaudars abenteuer": "Dschaudar's mother",
         "seine rolle finden": "David Hirsch / David Hurst",
         "der todestrieb": "Jacques Mesrine",
+        "der landstörzerin courasche abenteurlich leben": "Courasche",
         "tagebuch einer liebe oder jetzt erzählen wir uns eine geschichte, in der jetzt immerzu jetzt bleibt": "Veronika and Jens",
         "eingraviert": "Christin and the tattoo studio clients",
         "feature": "Feature authors and documentary makers",
@@ -468,6 +543,7 @@ def curated_description_subject(row: object, source_description: str = "") -> di
 
     curated_patterns = [
         (r"\bDiary of\s+([^.;:!?]{3,80})", "diary-of phrase"),
+        (r"\bfirst-person narrator\s+(" + PERSON_OR_SURNAME + r")\b", "first-person narrator phrase"),
         (r"\bmain character[^.]{0,120}\b(?:called|named)\s+([^.;:!?]{3,80})", "main-character naming"),
         (r"\bworker\s+(" + PERSON_OR_SURNAME + r")\b", "worker/name phrase"),
         (r"\b(?:letters?|Briefe?)\b[^.;:!?]{0,180}\b(?:artist|poet|writer|composer|painter|author|filmmaker|playwright|critic|director)\s+(" + PERSON_OR_SURNAME + r")\b[^.;:!?]{0,160}\bwrote\b", "letter writer"),
@@ -624,6 +700,9 @@ def subject_decision(row: object, source_description: str = "") -> dict[str, str
                     "method": "title/caption portrait phrase",
                     "confidence": "high",
                 }
+    autobiography_decision = autobiographical_author_decision(row, source_description)
+    if autobiography_decision["protagonist"]:
+        return autobiography_decision
     title_match = title_subject(title)
     if title_match:
         return {

@@ -129,6 +129,39 @@ def test_subject_name_extracts_named_opening_protagonist_before_composer_credit(
     assert subject_name(record) == "Achim Freyer"
 
 
+def test_subject_name_uses_author_for_autobiographical_description():
+    record = row(
+        title="Fortsetzung einer Flucht - Ein autobiographisches Hörspiel",
+        author="Werner Meyke",
+        authors="Werner Meyke",
+        description="This time he has created an original sound novelty: an autobiography.",
+    )
+
+    assert subject_name(record) == "Werner Meyke"
+
+
+def test_subject_name_uses_named_autobiographical_author_over_adaptation_credit():
+    record = row(
+        title="Montauk (2/2)",
+        author="Bearbeitung und Regie: Leonhard Koppelmann",
+        authors="",
+        description="In a collage of memories, diary excerpts, self-reflections and other autobiographical material, the Swiss writer Max Frisch dissects his life.",
+    )
+
+    assert subject_name(record) == "Max Frisch"
+
+
+def test_subject_name_keeps_fictional_autobiography_with_character():
+    record = row(
+        title="Tristram Shandy",
+        author="Laurence Sterne",
+        authors="Laurence Sterne",
+        description="Contrary to the title's announcement, which suggests a fictional autobiography, the reader learns little about the life of the title hero and first-person narrator Tristram.",
+    )
+
+    assert subject_name(record) == "Tristram"
+
+
 def test_subject_name_extracts_story_of_subject():
     record = row(
         title="Vorname Jonas",
