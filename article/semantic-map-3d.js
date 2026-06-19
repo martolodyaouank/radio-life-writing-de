@@ -360,12 +360,16 @@
     tooltip.hidden = false;
     tooltip.classList.toggle("is-pinned", pinned);
     const sourceLink = sourceAnchor(record);
+    const displayDate = record.firstBroadcastDate || record.date || record.year || "No date";
     tooltip.innerHTML = `
       <strong>${escapeHtml(record.title)}</strong>
-      <span>${record.year || "No year"} · ${escapeHtml(record.source)} · ${escapeHtml(record.form)}</span>
-      ${creditLine("Protagonist", record.dedicatedTo)}
+      <span>${escapeHtml(displayDate)} · ${escapeHtml(record.source)} · ${escapeHtml(record.form)}</span>
+      ${creditLine("Protagonist", record.protagonist || record.dedicatedTo)}
+      ${creditLine("Genre", record.genre)}
+      ${creditLine("Cluster", record.cluster)}
       ${creditLine("Director", record.director)}
       ${creditLine("Author", record.author)}
+      ${creditLine("Origin", record.originDetail)}
       <small><b>Description:</b> ${escapeHtml(record.description || record.subjectDescription || "No short description available in the source metadata.")}</small>
       ${sourceLink}
     `;
