@@ -42,6 +42,21 @@ def split_roles(value: str) -> list[str]:
     return [part.strip() for part in clean(value).split(";") if part.strip()]
 
 
+def load_existing_descriptions() -> dict[str, str]:
+    if not OUTPUT.exists():
+        return {}
+    text = OUTPUT.read_text(encoding="utf-8").strip()
+    prefix = "window.semanticMap3D = "
+    if not text.startswith(prefix):
+        return {}
+    payload = json.loads(text[len(prefix) :].rstrip(";"))
+    return {
+        clean(record.get("url")): clean(record.get("description"))
+        for record in payload.get("records", [])
+        if clean(record.get("url")) and clean(record.get("description"))
+    }
+
+
 def cluster_centers(clusters: list[str]) -> dict[str, tuple[float, float]]:
     radius = 22
     return {
@@ -79,6 +94,7 @@ def main() -> None:
     centers = cluster_centers(cluster_order)
     cluster_counts = defaultdict(int)
     cluster_totals = defaultdict(int)
+    existing_descriptions = load_existing_descriptions()
     for row in rows:
         cluster_totals[clean(row["cluster"]) or "Unclustered"] += 1
 
@@ -93,6 +109,8 @@ def main() -> None:
         center_x, center_y = centers[cluster]
         offset_x, offset_y = local_position(cluster_index, cluster_totals[cluster])
         roles = split_roles(row["protagonist_role"])
+        url = clean(row["url"])
+        description = existing_descriptions.get(url) or clean(row["description"])
 
         records.append(
             {
@@ -113,9 +131,9 @@ def main() -> None:
                 "protagonistRole": clean(row["protagonist_role"]),
                 "author": clean(row["author"]),
                 "director": clean(row["director"]),
-                "description": clean(row["description"]),
-                "subjectDescription": clean(row["description"]),
-                "url": clean(row["url"]),
+                "description": description,
+                "subjectDescription": description,
+                "url": url,
                 "x": round(center_x + offset_x, 4),
                 "y": round(center_y + offset_y, 4),
                 "z": round(z, 4),
