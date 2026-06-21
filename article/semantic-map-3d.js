@@ -28,6 +28,11 @@
     "Letters and correspondence": "#9D8FD6",
     "Portrait catalogue": "#3E6F8E",
     "Diaries and self-records": "#A8734F",
+    "Biography": "#4F8F77",
+    "Based on diaries": "#B56D8F",
+    "Based on letters": "#6F8FC9",
+    "Biofiction": "#D07A56",
+    "Sound art": "#5D9BB5",
   };
   const colors = Object.fromEntries(
     Object.entries(payload.clusterColors || {}).map(([label, fallback]) => [label, themeClusterColors[label] || fallback])
@@ -168,10 +173,10 @@
 
     fillSelect(formFilter, "All genres", payload.forms || uniqueValues("form"));
     fillSelect(sourceFilter, "All sources", payload.sources || uniqueValues("source"));
-    fillSelect(signalFilter, "All signals", payload.signals || uniqueSignals());
+    if (signalFilter) fillSelect(signalFilter, "All signals", payload.signals || uniqueSignals());
     fillSelect(whoFilter, "All life focuses", payload.whoAbout || uniqueWhoAbout());
 
-    [yearMinInput, yearMaxInput, formFilter, sourceFilter, signalFilter, whoFilter].forEach((control) => {
+    [yearMinInput, yearMaxInput, formFilter, sourceFilter, signalFilter, whoFilter].filter(Boolean).forEach((control) => {
       control.addEventListener("input", applyFilters);
       control.addEventListener("change", applyFilters);
     });
@@ -219,7 +224,7 @@
     yearMaxInput.value = payload.yearMax;
     formFilter.value = "";
     sourceFilter.value = "";
-    signalFilter.value = "";
+    if (signalFilter) signalFilter.value = "";
     whoFilter.value = "";
     applyFilters();
   }
@@ -239,7 +244,7 @@
 
     const form = formFilter.value;
     const source = sourceFilter.value;
-    const signal = signalFilter.value;
+    const signal = signalFilter ? signalFilter.value : "";
     const who = whoFilter.value;
     visibleRecords = records.filter((record) => {
       const year = Number(record.year || payload.yearMin);
@@ -361,26 +366,24 @@
     tooltip.classList.toggle("is-pinned", pinned);
     const sourceLink = sourceAnchor(record);
     const displayDate = record.firstBroadcastDate || record.date || record.year || "No date";
+    const metaLine = [displayDate, record.broadcastingStation || record.broadcaster, record.genre, record.cluster]
+      .filter(Boolean)
+      .join(" · ");
+    const protagonistLine = [record.protagonist || record.dedicatedTo, record.protagonistRole]
+      .filter(Boolean)
+      .join(" - ");
+    const creditLineText = [record.author, record.director].filter(Boolean).join(" - ");
     tooltip.innerHTML = `
-      <strong>${escapeHtml(record.title)}</strong>
-      <span>${escapeHtml(displayDate)} · ${escapeHtml(record.source)} · ${escapeHtml(record.form)}</span>
-      ${creditLine("Protagonist", record.protagonist || record.dedicatedTo)}
-      ${creditLine("Genre", record.genre)}
-      ${creditLine("Cluster", record.cluster)}
-      ${creditLine("Director", record.director)}
-      ${creditLine("Author", record.author)}
-      ${creditLine("Origin", record.originDetail)}
-      <small><b>Description:</b> ${escapeHtml(record.description || record.subjectDescription || "No short description available in the source metadata.")}</small>
+      <strong class="card-title">${escapeHtml(record.title)}</strong>
+      <span>${escapeHtml(metaLine)}</span>
+      <span class="card-protagonist"><b>${escapeHtml(protagonistLine || "No protagonist listed")}</b></span>
+      <span>${escapeHtml(creditLineText)}</span>
+      <small>${escapeHtml(record.description || record.subjectDescription || "No short description available in the source metadata.")}</small>
       ${sourceLink}
     `;
     const rect = container.getBoundingClientRect();
     tooltip.style.transform = `translate(${event.clientX - rect.left + 14}px, ${event.clientY - rect.top + 14}px)`;
     yearReadout.textContent = record.year ? `${record.year}` : "No year";
-  }
-
-  function creditLine(label, value) {
-    const text = String(value || "").trim();
-    return text ? `<span>${escapeHtml(label)}: ${escapeHtml(text)}</span>` : "";
   }
 
   function togglePinnedCard(index, event) {

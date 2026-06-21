@@ -22,7 +22,7 @@
           <p>A German-first corpus of biographical radio drama, documentary feature, and sound art — explored through archive metadata and latent semantic representations.</p>
           <div class="hero-metrics" aria-label="Corpus metrics">
             <div><strong data-count="1764">0</strong><span>scraped records</span></div>
-            <div><strong data-count="603">0</strong><span>curated map entries</span></div>
+            <div><strong data-count="567">0</strong><span>curated map entries</span></div>
             <div><strong data-count="4488">0</strong><span>text features</span></div>
             <div><strong data-count="7">0</strong><span>semantic clusters</span></div>
           </div>
@@ -52,21 +52,21 @@
           <p>For each curated record we extract whom it appears to be about, then add provisional life-focus tags. A record can carry several — the subject line is the anchor, the tags are aids for sorting.</p>
         </div>
         <div class="subject-summary">
-          <span><b>208</b> documentary / self-record subjects</span>
-          <span><b>172</b> ordinary / private persons</span>
-          <span><b>138</b> family / intimate lives</span>
-          <span><b>119</b> authors / literary figures</span>
-          <span><b>104</b> women’s lives</span>
-          <span><b>76</b> musicians / composers</span>
-          <span><b>72</b> actors / performers</span>
-          <span><b>65</b> artists / visual artists</span>
+          <span><b>221</b> authors</span>
+          <span><b>150</b> women</span>
+          <span><b>136</b> ordinary persons</span>
+          <span><b>99</b> fictional characters</span>
+          <span><b>73</b> musicians</span>
+          <span><b>51</b> artists</span>
+          <span><b>47</b> collectives</span>
+          <span><b>32</b> directors</span>
         </div>
       </section>
 
       <section class="graph-section map-section section-pad" data-reveal>
         <div class="section-copy">
           <h2>Latent semantic map</h2>
-          <p>603 curated life-writing records, embedded from cleaned descriptions and metadata. Each bubble is one broadcast, coloured by semantic cluster. Hover for its source card; click to pin it. Switch between the semantic field and a timeline where the vertical axis becomes year.</p>
+          <p>567 curated life-writing records, updated from the spreadsheet metadata. Each bubble is one broadcast, coloured by spreadsheet cluster. Hover for its source card; click to pin it. Switch between the semantic field and a timeline where the vertical axis becomes year.</p>
         </div>
         <div class="graph-preserve semantic-3d" data-semantic-map-3d>
           <div class="map-toolbar">
@@ -87,7 +87,6 @@
             </label>
             <label><span>Genre</span><select data-form-filter></select></label>
             <label><span>Source</span><select data-source-filter></select></label>
-            <label><span>Memory signal</span><select data-signal-filter></select></label>
             <label><span>Life focus</span><select data-who-filter></select></label>
           </div>
           <div class="map-clusters" data-cluster-filters aria-label="Cluster filters"></div>
@@ -126,7 +125,7 @@
         <article>
           <div class="section-copy">
             <h2>Cluster profiles</h2>
-            <p>Share of core records flagged for each memory signal. Trauma and family dominate; voice, sound material and explicit archive references are the rarer, more deliberate moves.</p>
+            <p>Share of core records by the remaining analytical signals. Trauma and family dominate; voice, sound material and explicit archive references are the rarer, more deliberate moves.</p>
           </div>
           <figure class="graph-figure"><img src="figures/05_cluster_profile.png" alt="What each semantic cluster is made of graph" /></figure>
         </article>
@@ -162,8 +161,8 @@
       </footer>
     </main>
     <script src="vendor/three.min.js"></script>
-    <script src="semantic-map-3d-data.js?v=20260621-spreadsheet-sync"></script>
-    <script src="semantic-map-3d.js?v=20260619-first50-card-curation"></script>
+    <script src="semantic-map-3d-data.js?v=20260621-spreadsheet-clusters"></script>
+    <script src="semantic-map-3d.js?v=20260621-spreadsheet-cards"></script>
     <script src="page.js?v=20260617-no-shadow"></script>
   </body>
 </html>

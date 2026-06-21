@@ -52,7 +52,7 @@ main{overflow-x:hidden}
 .map-toolbar b{display:inline-block;margin-left:8px;color:#4747A1;font-weight:800}
 .map-toolbar button{min-height:32px;padding:5px 10px;border:1.5px solid rgba(38,50,76,.18);border-radius:0;background:#FBF1ED;color:#26324C;font:inherit;font-weight:700;cursor:pointer}
 .map-toolbar button:hover{border-color:#C25B72;color:#C25B72}
-.map-controls{display:grid;grid-template-columns:minmax(210px,1.15fr) repeat(4,minmax(120px,.72fr));gap:8px;margin-bottom:9px}
+.map-controls{display:grid;grid-template-columns:minmax(210px,1.15fr) repeat(3,minmax(120px,.72fr));gap:8px;margin-bottom:9px}
 .year-control{min-width:0}
 .map-controls label{min-width:0;padding:9px 10px;border:1.5px solid rgba(38,50,76,.14);background:rgba(251,241,237,.78)}
 .map-controls label>span{display:flex;justify-content:space-between;gap:10px;margin-bottom:6px;color:#515970;font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase}
@@ -69,10 +69,12 @@ main{overflow-x:hidden}
 .map-canvas{position:relative;overflow:hidden;min-height:540px;border:1.5px solid rgba(38,50,76,.14);background:#FBF1ED;cursor:grab}
 .map-canvas:active{cursor:grabbing}
 .map-canvas canvas{display:block;width:100%;height:100%}
-.map-tooltip{position:absolute;left:0;top:0;z-index:4;max-width:min(320px,calc(100vw - 42px));padding:10px 12px;border:1.5px solid rgba(38,50,76,.18);background:rgba(251,241,237,.97);box-shadow:0 14px 34px rgba(38,50,76,.16);pointer-events:auto}
+.map-tooltip{position:absolute;left:0;top:0;z-index:4;max-width:min(430px,calc(100vw - 42px));padding:10px 12px;border:1.5px solid rgba(38,50,76,.18);background:rgba(251,241,237,.97);box-shadow:0 14px 34px rgba(38,50,76,.16);pointer-events:auto}
 .map-tooltip strong,.map-tooltip span,.map-tooltip em,.map-tooltip small,.map-tooltip a{display:block}
 .map-tooltip strong{line-height:1.2}
+.map-tooltip .card-title{font-size:1.08rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .map-tooltip span,.map-tooltip em,.map-tooltip small{margin-top:4px;color:#515970;font-size:.84rem}
+.map-tooltip .card-protagonist{color:#26324C}
 .map-tooltip em{color:#4747A1;font-style:normal}
 .map-tooltip small{font-size:.77rem}
 .map-tooltip a{margin-top:8px;color:#C25B72;font-size:.82rem;font-weight:800;text-decoration:underline;text-underline-offset:3px}
