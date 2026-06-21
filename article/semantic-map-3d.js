@@ -372,13 +372,15 @@
     const protagonistLine = [record.protagonist || record.dedicatedTo, record.protagonistRole]
       .filter(Boolean)
       .join(" - ");
-    const creditLineText = [record.author, record.director].filter(Boolean).join(" - ");
+    const authorLine = record.author ? `<span><b>Author:</b> ${escapeHtml(record.author)}</span>` : "";
+    const directorLine = record.director ? `<span><b>Director:</b> ${escapeHtml(record.director)}</span>` : "";
     const description = record.description || record.subjectDescription || "No short description available in the source metadata.";
     tooltip.innerHTML = `
       <strong class="card-title">${escapeHtml(record.title)}</strong>
       <span>${escapeHtml(metaLine)}</span>
       <span class="card-protagonist"><b>Protagonist: ${escapeHtml(protagonistLine || "No protagonist listed")}</b></span>
-      <span>${escapeHtml(creditLineText)}</span>
+      ${authorLine}
+      ${directorLine}
       <small><b>Description:</b> ${escapeHtml(description)}</small>
       ${sourceLink}
     `;
