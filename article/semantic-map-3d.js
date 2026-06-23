@@ -22,7 +22,6 @@
 
   const themeClusterColors = {
     "Autobiographical lives": "#C29A45",
-    "Social documentary lives": "#C25B72",
     "Curated documentary close readings": "#7A8493",
     "Sound art and listening": "#6A7F67",
     "Letters and correspondence": "#9D8FD6",
@@ -151,9 +150,11 @@
   }
 
   function initialiseControls() {
-    legend.innerHTML = clusters
-      .map((label) => `<span><i style="background:${colors[label]}"></i>${escapeHtml(label)}</span>`)
-      .join("");
+    if (legend) {
+      legend.innerHTML = clusters
+        .map((label) => `<span><i style="background:${colors[label]}"></i>${escapeHtml(label)}</span>`)
+        .join("");
+    }
 
     clusterFilters.innerHTML = clusters
       .map((label) => {

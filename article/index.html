@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Lives on Air | German Radio Biography as Data</title>
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles.css?v=20260623-open-window-examples" />
   </head>
   <body>
     <main>
@@ -21,10 +21,10 @@
           <h1>Lives on Air</h1>
           <p>A German-first corpus of biographical radio drama, documentary feature, and sound art — explored through archive metadata and latent semantic representations.</p>
           <div class="hero-metrics" aria-label="Corpus metrics">
-            <div><strong data-count="1764">0</strong><span>scraped records</span></div>
-            <div><strong data-count="567">0</strong><span>curated map entries</span></div>
-            <div><strong data-count="4488">0</strong><span>text features</span></div>
-            <div><strong data-count="7">0</strong><span>semantic clusters</span></div>
+            <div><strong data-count="566">0</strong><span>curated map entries</span></div>
+            <div><strong data-count="6">0</strong><span>semantic clusters</span></div>
+            <div><strong data-count="3">0</strong><span>source collections</span></div>
+            <div><strong data-count="78">0</strong><span>years covered</span></div>
           </div>
         </div>
       </section>
@@ -39,11 +39,9 @@
       <section class="graph-section section-pad" data-reveal>
         <div class="section-copy">
           <h2>Corpus triage</h2>
-          <p>DRA supplies the historical backbone; Hoerspiel und Feature adds recent programme pages; Wirklichkeit im Radio is small but unusually rich in critical commentary. Confidence levels mark <em>discovery quality</em>, not scholarly certainty.</p>
+          <p>These counts now come from the curated semantic map records only. DRA supplies the historical backbone; DLF / DLF Kultur adds recent programme pages; Wirklichkeit im Radio is small but text-rich.</p>
         </div>
-        <figure class="graph-figure">
-          <img src="figures/01_corpus_triage.png" alt="A Working Corpus, Not a Finished Canon graph" />
-        </figure>
+        <div class="interactive-panel" data-corpus-triage></div>
       </section>
 
       <section class="graph-section section-pad" data-reveal>
@@ -51,27 +49,18 @@
           <h2>Who are these lives about?</h2>
           <p>For each curated record we extract whom it appears to be about, then add provisional life-focus tags. A record can carry several — the subject line is the anchor, the tags are aids for sorting.</p>
         </div>
-        <div class="subject-summary">
-          <span><b>221</b> authors</span>
-          <span><b>150</b> women</span>
-          <span><b>136</b> ordinary persons</span>
-          <span><b>99</b> fictional characters</span>
-          <span><b>73</b> musicians</span>
-          <span><b>51</b> artists</span>
-          <span><b>47</b> collectives</span>
-          <span><b>32</b> directors</span>
-        </div>
+        <div class="subject-summary" data-subject-summary></div>
       </section>
 
       <section class="graph-section map-section section-pad" data-reveal>
         <div class="section-copy">
           <h2>Latent semantic map</h2>
-          <p>567 curated life-writing records, updated from the spreadsheet metadata. Each bubble is one broadcast, coloured by spreadsheet cluster. Hover for its source card; click to pin it. Switch between the semantic field and a timeline where the vertical axis becomes year.</p>
+          <p>566 curated life-writing records, updated from the spreadsheet metadata. Each bubble is one broadcast, coloured by spreadsheet cluster. Hover for its source card; click to pin it; drag to rotate and scroll to zoom.</p>
         </div>
         <div class="graph-preserve semantic-3d" data-semantic-map-3d>
           <div class="map-toolbar">
             <span>3D semantic field · z-axis: year <b data-year-readout>Hover a point</b></span>
-            <span class="map-count" data-visible-readout>602 shown</span>
+            <span class="map-count" data-visible-readout>566 shown</span>
             <span class="map-actions">
               <button type="button" data-reset-filters>Reset filters</button>
               <button type="button" data-reset-map>Reset view</button>
@@ -92,16 +81,15 @@
           <div class="map-clusters" data-cluster-filters aria-label="Cluster filters"></div>
           <div class="map-canvas" aria-label="Interactive 3D semantic map"></div>
           <div class="map-tooltip" hidden></div>
-          <div class="map-legend" aria-label="Cluster legend"></div>
         </div>
       </section>
 
       <section class="graph-grid section-pad" data-reveal>
         <div class="section-copy">
-          <h2>Cluster terms</h2>
-          <p>Clusters are labelled from their strongest terms, then checked against the nearest exemplar works. They differ by acoustic-memory makeup, not only by title keywords.</p>
+          <h2>Cluster explorer</h2>
+          <p>Cluster labels, counts, sources, life-focus tags, and examples are derived from the same records plotted in the semantic map.</p>
         </div>
-        <figure class="graph-figure"><img src="figures/06_cluster_terms.png" alt="Semantic clusters and their terms graph" /></figure>
+        <div class="interactive-panel" data-cluster-explorer></div>
       </section>
 
       <section class="graph-grid two section-pad" data-reveal>
@@ -110,14 +98,14 @@
             <h2>Source mix</h2>
             <p>Some clusters are archive-led; others are shaped by DLF web descriptions or Wirklichkeit essays.</p>
           </div>
-          <figure class="graph-figure"><img src="figures/07_cluster_source_mix.png" alt="Source mix by semantic cluster graph" /></figure>
+          <div class="interactive-panel compact" data-source-mix></div>
         </article>
         <article>
           <div class="section-copy">
             <h2>Historical Form</h2>
-            <p>Biography is distributed across adaptation, feature, portrait, original radio play, and sound art.</p>
+            <p>Forms are grouped from the map genres, so the distribution follows the visible corpus rather than the older static figure.</p>
           </div>
-          <figure class="graph-figure"><img src="figures/02_temporal_form_heatmap.png" alt="Where biography appears form families over time graph" /></figure>
+          <div class="interactive-panel compact" data-form-mix></div>
         </article>
       </section>
 
@@ -125,29 +113,25 @@
         <article>
           <div class="section-copy">
             <h2>Cluster profiles</h2>
-            <p>Share of core records by the remaining analytical signals. Trauma and family dominate; voice, sound material and explicit archive references are the rarer, more deliberate moves.</p>
+            <p>Top life-focus tags by cluster, recalculated from the map records after the removed item.</p>
           </div>
-          <figure class="graph-figure"><img src="figures/05_cluster_profile.png" alt="What each semantic cluster is made of graph" /></figure>
+          <div class="interactive-panel compact" data-cluster-profiles></div>
         </article>
         <article>
           <div class="section-copy">
-            <h2>How long do lives run?</h2>
-            <p>Median running time by cluster (minutes), with the typical range. Duration is a rough proxy, but it separates compact portrait and catalogue pieces from the longer documentary and autobiographical forms that invite extended memory work.</p>
+            <h2>When do lives cluster?</h2>
+            <p>Decade distribution by cluster, using the map year attached to each broadcast.</p>
           </div>
-          <figure class="graph-figure"><img src="figures/08_duration_by_cluster.png" alt="Dramaturgical scale by semantic cluster graph" /></figure>
+          <div class="interactive-panel compact" data-decade-profile></div>
         </article>
       </section>
 
-      <section class="takeaways" data-reveal>
-        <div>
-          <h2>What is useful here</h2>
-          <div class="takeaway-grid">
-            <div><strong>01</strong><p>The corpus is now searchable as a German radio-memory <em>field</em>, not just a list of scraped pages.</p></div>
-            <div><strong>02</strong><p>The latent clusters create a close-reading shortlist: diaries, letters, portraits, sound art, social documentary, and curated criticism.</p></div>
-            <div><strong>03</strong><p>The method exposes where metadata is thin — DRA is historically broad, while Wirklichkeit and DLF are text-rich enough for semantic modelling.</p></div>
-            <div><strong>04</strong><p>The next serious step is to replace TF-IDF / SVD with sentence-transformer embeddings and manually review cluster exemplars.</p></div>
-          </div>
+      <section class="graph-section section-pad" data-reveal>
+        <div class="section-copy">
+          <h2>Dramaturgical scale</h2>
+          <p>Running times matched back to the current semantic-map records. Each dot is one broadcast with duration metadata; the box shows the middle half of each cluster and the median line.</p>
         </div>
+        <div class="interactive-panel duration-panel" data-duration-scale></div>
       </section>
 
       <footer class="footer">
@@ -162,7 +146,9 @@
     </main>
     <script src="vendor/three.min.js"></script>
     <script src="semantic-map-3d-data.js?v=20260621-spreadsheet-clusters"></script>
-    <script src="semantic-map-3d.js?v=20260621-spreadsheet-cards"></script>
+    <script src="semantic-map-3d.js?v=20260623-no-map-legend"></script>
+    <script src="duration-scale-data.js?v=20260622-duration-scale"></script>
+    <script src="semantic-dashboard.js?v=20260623-popup-source-window"></script>
     <script src="page.js?v=20260617-no-shadow"></script>
   </body>
 </html>
