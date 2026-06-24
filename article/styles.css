@@ -14,10 +14,10 @@ a{color:inherit}
 p{margin:0}
 @keyframes eq{0%,100%{height:7px}50%{height:30px}}
 main{overflow-x:hidden}
-.hero{position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:clamp(30px,5vw,70px) clamp(20px,5vw,60px) clamp(40px,6vw,80px);text-align:center;overflow:hidden;background:#F6D7D1}
-.hero-waves{position:absolute;top:0;left:0;width:100%;height:78%;pointer-events:none;z-index:1}
-.hero-radio{position:relative;z-index:3;margin-top:clamp(60px,12vw,170px);margin-bottom:clamp(56px,10vw,140px);display:flex;justify-content:center;width:100%}
-.hero-radio img,.hero-radio svg{display:block;width:clamp(280px,44vw,580px);border:0;background:transparent}
+.hero{position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:clamp(24px,4vw,46px) clamp(20px,5vw,60px) clamp(32px,5vw,56px);text-align:center;overflow:hidden;background:#F6D7D1}
+.hero-waves{position:absolute;top:0;left:0;width:100%;height:58%;pointer-events:none;z-index:1}
+.hero-radio{position:relative;z-index:3;margin-top:clamp(32px,6vw,78px);margin-bottom:clamp(24px,4vw,44px);display:flex;justify-content:center;width:100%}
+.hero-radio img,.hero-radio svg{display:block;width:clamp(230px,32vw,430px);border:0;background:transparent}
 .hero-radio svg{height:auto;overflow:visible}
 .hero-copy{position:relative;z-index:2;max-width:920px}
 .hero h1{font-family:'Archivo',sans-serif;font-weight:800;font-size:clamp(52px,10vw,132px);line-height:.95;letter-spacing:-.025em;color:#26324C;margin:0}
@@ -181,5 +181,5 @@ main{overflow-x:hidden}
 [data-reveal]{opacity:0;transform:translateY(30px);transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1)}
 [data-reveal].is-visible{opacity:1;transform:none}
 @media(max-width:900px){.graph-grid.two,.subject-summary,.triage-top,.cluster-layout{grid-template-columns:1fr}.cluster-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}.map-controls{grid-template-columns:repeat(2,minmax(0,1fr))}.map-canvas{min-height:430px}.exemplar-grid{grid-template-columns:1fr}.duration-chart{padding-left:150px}.duration-grid{left:150px}.duration-label{left:-138px;width:126px}.duration-axis{left:150px}}
-@media(max-width:620px){.subject-summary,.cluster-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}.map-controls{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.year-control,.map-controls label:last-child{grid-column:1/-1}.map-canvas{min-height:415px}.bar-row,.timeline-row{grid-template-columns:1fr}.profile-head,.profile-row{grid-template-columns:1fr}.profile-head span:first-child{display:none}.stat-cards,.detail-metrics{grid-template-columns:1fr}.duration-chart{padding:14px 10px 44px 112px}.duration-grid{inset:14px 10px 44px 112px}.duration-label{left:-104px;width:96px;font-size:.74rem}.duration-axis{left:112px;right:10px}.duration-row{height:58px}}
+@media(max-width:620px){.hero{justify-content:flex-start}.hero-waves{height:42%}.hero-radio{margin-top:clamp(18px,7vw,34px);margin-bottom:18px}.hero-radio img,.hero-radio svg{width:clamp(190px,58vw,260px)}.hero h1{font-size:clamp(42px,13vw,68px)}.hero-copy>p{font-size:clamp(16px,4.6vw,19px);line-height:1.4}.hero-metrics{gap:16px 22px;margin-top:24px}.hero-metrics strong{font-size:clamp(30px,9vw,42px)}.subject-summary,.cluster-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}.map-controls{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.year-control,.map-controls label:last-child{grid-column:1/-1}.map-canvas{min-height:415px}.bar-row,.timeline-row{grid-template-columns:1fr}.profile-head,.profile-row{grid-template-columns:1fr}.profile-head span:first-child{display:none}.stat-cards,.detail-metrics{grid-template-columns:1fr}.duration-chart{padding:14px 10px 44px 112px}.duration-grid{inset:14px 10px 44px 112px}.duration-label{left:-104px;width:96px;font-size:.74rem}.duration-axis{left:112px;right:10px}.duration-row{height:58px}}
 @media(max-width:460px){.map-controls{grid-template-columns:1fr}.map-actions{width:100%;margin-left:0}.map-actions button{flex:1}}
