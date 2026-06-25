@@ -268,11 +268,13 @@
     }
     let active = new Set(clusters.filter((cluster) => durationRecords.some((record) => record.cluster === cluster)));
     const maxDuration = Math.ceil(Math.min(160, Math.max(...durationRecords.map((record) => Number(record.duration)))) / 20) * 20;
+    const mapRecordCount = durationPayload.mapRecords || records.length;
+    const missingDurationCount = Math.max(0, mapRecordCount - durationRecords.length);
     host.innerHTML = `
       <div class="duration-viz">
         <div class="duration-controls">
           <div>
-            <h3 class="panel-title">${durationRecords.length} of ${durationPayload.mapRecords || records.length} map records</h3>
+            <h3 class="panel-title">${durationRecords.length} of ${mapRecordCount} map records${missingDurationCount ? "*" : ""}</h3>
           </div>
           <div class="chip-row" data-duration-clusters></div>
         </div>
@@ -280,6 +282,7 @@
         <div class="duration-foot">
           <span>Dots beyond ${maxDuration} minutes are clipped to the right edge.</span>
           <span>Box = Q1-Q3; line = median; whisker = 10th-90th percentile.</span>
+          ${missingDurationCount ? `<span>*Duration data for ${missingDurationCount} other broadcasts is not retrievable from the available metadata.</span>` : ""}
         </div>
       </div>
     `;
