@@ -17,9 +17,9 @@ main{overflow-x:hidden}
 .hero-copy{position:relative;z-index:2;max-width:920px}
 .hero h1{font-family:var(--display);font-weight:600;font-size:clamp(46px,7.6vw,108px);line-height:.98;letter-spacing:-.01em;color:#26324C;margin:0}
 .hero-copy>p{font-family:var(--sans);font-weight:400;font-size:clamp(17px,1.8vw,23px);line-height:1.55;max-width:600px;margin:clamp(18px,2.1vw,26px) auto 0;color:#3F4860}
-.hero-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(18px,3.4vw,44px);width:min(100%,720px);margin:clamp(20px,2.6vw,40px) auto 0}
-.hero-metrics div{text-align:center;min-width:0}
-.hero-metrics strong{display:block;font-family:var(--display);font-weight:600;font-size:clamp(30px,3.7vw,52px);line-height:1;color:#26324C;white-space:nowrap}
+.hero-metrics{display:grid;grid-template-columns:minmax(0,1fr) max-content minmax(0,1fr);gap:clamp(18px,3.4vw,44px);width:min(100%,720px);margin:clamp(20px,2.6vw,40px) auto 0}
+.hero-metrics div{display:flex;flex-direction:column;align-items:center;text-align:center;min-width:0}
+.hero-metrics strong{display:inline-block;font-family:var(--display);font-weight:600;font-size:clamp(30px,3.7vw,52px);line-height:1;color:#26324C;white-space:nowrap}
 .hero-metrics div:nth-child(2) strong{color:#C25B72}
 .hero-metrics div:nth-child(3) strong{color:#4747A1}
 .hero-metrics span{display:block;font-family:var(--sans);font-weight:700;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8693AC;margin-top:8px}
