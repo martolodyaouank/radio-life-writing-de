@@ -39,7 +39,7 @@
     const values = [
       { count: programmeCount, label: "programmes" },
       { text: `${yearMin}-${yearMax}`, label: "broadcast years" },
-      { count: clusters.length, label: "semantic clusters" },
+      { count: clusters.length, label: "working clusters" },
     ];
     document.querySelectorAll(".hero-metrics div").forEach((item, index) => {
       const strong = item.querySelector("strong");
@@ -91,7 +91,7 @@
         <div class="triage-top">
           <div>
             <div class="triage-number">${records.length}</div>
-            <p class="triage-caption">curated entries in the semantic map after removing the non-life-writing item.</p>
+            <p class="triage-caption">visible entries after modeling 806 high- and medium-confidence candidates and applying the curated map layer.</p>
           </div>
           <div>
             <h3 class="panel-title">Where the curated map records come from</h3>

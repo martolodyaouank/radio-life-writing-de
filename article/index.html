@@ -19,11 +19,11 @@
         </div>
         <div class="hero-copy">
           <h1>Lives on Air</h1>
-          <p>A German-first corpus of biographical radio drama, documentary feature, and sound art — explored through archive metadata and latent semantic representations.</p>
+          <p>A German-first corpus of biographical radio drama, documentary feature, and sound art — explored through archive metadata and provisional semantic representations.</p>
           <div class="hero-metrics" aria-label="Corpus metrics">
             <div><strong data-count="566">0</strong><span>programmes</span></div>
             <div><strong>1949-2026</strong><span>broadcast years</span></div>
-            <div><strong data-count="6">0</strong><span>semantic clusters</span></div>
+            <div><strong data-count="6">0</strong><span>working clusters</span></div>
           </div>
         </div>
       </section>
@@ -31,14 +31,39 @@
       <section class="intro section-pad" data-reveal>
         <div>
           <p class="lede">This project turns scattered German radio archive and programme metadata into a corpus for studying <span>biographical radio drama</span>, documentary feature, and sound-based life writing.</p>
-          <p>It is not a final canon; it is a navigational layer for finding patterns, absences, and promising cases for close listening. The pipeline combines DRA / ARD Hoerspieldatenbank, Hoerspiel und Feature, and Wirklichkeit im Radio, then models the high- and medium-confidence subset with TF-IDF, truncated SVD embeddings, k-means clusters, and t-SNE projection — tuned to acoustic memory: voice, sound material, archives, testimony, family history, and the institutional forms through which radio remembers.</p>
+          <p>It is not a final canon, and the clusters are not evidence on their own. The project is a navigational layer for finding patterns, absences, and promising cases for close listening. It starts from 1,764 merged German records, models the 806 high- and medium-confidence candidates, and displays a 566-record curated map after spreadsheet review and exclusions.</p>
+        </div>
+      </section>
+
+      <section class="method-section section-pad" data-reveal>
+        <div class="section-copy">
+          <h2>How to read the model</h2>
+          <p>The pipeline is useful for triage, not for settled classification. TF-IDF, truncated SVD, k-means, and t-SNE are used to make a large, uneven archive browsable; the labels are working names checked against top terms, nearest examples, source mix, and manual curation notes.</p>
+        </div>
+        <div class="method-grid" aria-label="Method notes and limitations">
+          <article>
+            <h3>Selection</h3>
+            <p>High confidence means an explicit biographical signal in source metadata or programme text. Medium confidence means weaker but plausible life-writing evidence. Low-confidence and non-life-writing items are held out of the public map rather than treated as negative examples.</p>
+          </article>
+          <article>
+            <h3>Cluster count</h3>
+            <p>The visible map uses six spreadsheet clusters for readability. The underlying model summary records seven k-means clusters over 806 candidates; this article-facing layer merges and relabels after examining terms, exemplars, and outliers.</p>
+          </article>
+          <article>
+            <h3>Source confound</h3>
+            <p>DRA records are often short catalogue descriptions, while DLF and Wirklichkeit pages can be much longer essays. The source-mix views are therefore diagnostic: clusters may reflect register and text length as well as topic.</p>
+          </article>
+          <article>
+            <h3>Validation status</h3>
+            <p>Validation here is interpretive: source cards, protagonist extraction, cluster labels, and exclusions have been human-checked where the map uses them. A formal quality score or independent hand-coded benchmark is still future work.</p>
+          </article>
         </div>
       </section>
 
       <section class="graph-section section-pad" data-reveal>
         <div class="section-copy">
           <h2>Corpus triage</h2>
-          <p>These counts now come from the curated semantic map records only. DRA supplies the historical backbone; DLF / DLF Kultur adds recent programme pages; Wirklichkeit im Radio is small but text-rich.</p>
+          <p>These counts describe the 566 visible map records, not the full scrape. DRA supplies the historical backbone; DLF / DLF Kultur adds recent programme pages; Wirklichkeit im Radio is small but text-rich.</p>
         </div>
         <div class="interactive-panel" data-corpus-triage></div>
       </section>
@@ -54,11 +79,11 @@
       <section class="graph-section map-section section-pad" data-reveal>
         <div class="section-copy">
           <h2>Latent semantic map</h2>
-          <p>566 curated life-writing records, updated from the spreadsheet metadata. Each bubble is one broadcast, coloured by spreadsheet cluster. Hover for its source card; click to pin it; drag to rotate and scroll to zoom.</p>
+          <p>566 curated life-writing records, updated from the spreadsheet metadata. Each bubble is one broadcast, coloured by working cluster. The horizontal positions are a t-SNE projection and should be read as an exploratory layout, not as measurable distance; the vertical axis only adds broadcast year. Hover for its source card; click to pin it.</p>
         </div>
         <div class="graph-preserve semantic-3d" data-semantic-map-3d>
           <div class="map-toolbar">
-            <span>3D semantic field · z-axis: year <b data-year-readout>Hover a point</b></span>
+            <span>Exploratory map · vertical axis: year <b data-year-readout>Hover a point</b></span>
             <span class="map-count" data-visible-readout>566 shown</span>
             <span class="map-actions">
               <button type="button" data-reset-filters>Reset filters</button>
@@ -86,7 +111,7 @@
       <section class="graph-grid section-pad" data-reveal>
         <div class="section-copy">
           <h2>Cluster explorer</h2>
-          <p>Cluster labels, counts, sources, life-focus tags, and examples are derived from the same records plotted in the semantic map.</p>
+          <p>Cluster labels, counts, sources, life-focus tags, and examples are derived from the same records plotted in the semantic map. Use them as prompts for listening and checking, not as a final taxonomy.</p>
         </div>
         <div class="interactive-panel" data-cluster-explorer></div>
       </section>
@@ -95,7 +120,7 @@
         <article>
           <div class="section-copy">
             <h2>Source mix</h2>
-            <p>Some clusters are archive-led; others are shaped by DLF web descriptions or Wirklichkeit essays.</p>
+            <p>Some clusters are archive-led; others are shaped by DLF web descriptions or Wirklichkeit essays. This is a confound, not just context, so source balance should qualify any semantic reading.</p>
           </div>
           <div class="interactive-panel compact" data-source-mix></div>
         </article>
