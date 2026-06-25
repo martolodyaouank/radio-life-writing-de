@@ -3,15 +3,12 @@ from __future__ import annotations
 import csv
 import json
 import math
-import re
-from collections import Counter
-
-import numpy as np
 
 from lives_on_air.config import PROJECT_ROOT
 
 
 INPUT = PROJECT_ROOT / "data" / "latent_semantic_map_all_602_sorted.csv"
+ORIGINAL_LAYOUT_INPUT = PROJECT_ROOT / "data" / "processed" / "analysis_tables" / "core_semantic_enriched.csv"
 OUTPUT = PROJECT_ROOT / "article" / "semantic-map-3d-data.js"
 
 CLUSTER_COLORS = {
@@ -29,59 +26,6 @@ CLUSTER_COLORS = {
     "Sound art": "#5d9bb5",
 }
 
-TEXT_FIELDS = [
-    "title",
-    "description",
-    "genre",
-    "protagonist_verified",
-    "protagonist_role",
-    "author",
-    "director",
-    "broadcasting_station",
-    "source",
-]
-
-STOPWORDS = {
-    "aber",
-    "alle",
-    "als",
-    "auch",
-    "auf",
-    "aus",
-    "bei",
-    "das",
-    "dem",
-    "den",
-    "der",
-    "des",
-    "die",
-    "ein",
-    "eine",
-    "einem",
-    "einen",
-    "einer",
-    "eines",
-    "feature",
-    "für",
-    "hat",
-    "hörspiel",
-    "im",
-    "in",
-    "ist",
-    "mit",
-    "nach",
-    "nicht",
-    "oder",
-    "sich",
-    "und",
-    "von",
-    "war",
-    "wird",
-    "zu",
-    "zum",
-    "zur",
-}
-
 
 def clean(value: object) -> str:
     return str(value or "").strip()
@@ -92,6 +36,16 @@ def safe_year(value: str) -> int | None:
         return int(float(clean(value)))
     except ValueError:
         return None
+
+
+def safe_float(value: object, fallback: float = 0.0) -> float:
+    try:
+        parsed = float(clean(value))
+    except ValueError:
+        return fallback
+    if not math.isfinite(parsed):
+        return fallback
+    return parsed
 
 
 def split_roles(value: str) -> list[str]:
@@ -113,82 +67,19 @@ def load_existing_descriptions() -> dict[str, str]:
     }
 
 
-def row_text(row: dict[str, str]) -> str:
-    return " ".join(clean(row.get(field)) for field in TEXT_FIELDS if clean(row.get(field)))
-
-
-def tokenize(text: str) -> list[str]:
-    return [
-        token
-        for token in re.findall(r"[a-zA-ZäöüÄÖÜß][a-zA-ZäöüÄÖÜß-]{2,}", text.casefold())
-        if token not in STOPWORDS
-    ]
-
-
-def tfidf_matrix(texts: list[str], max_features: int = 5000) -> np.ndarray:
-    tokenized = [tokenize(text) for text in texts]
-    document_frequency = Counter(token for tokens in tokenized for token in set(tokens))
-    min_df = 2 if len(texts) < 120 else 3
-    terms = [
-        term
-        for term, _ in document_frequency.most_common(max_features)
-        if document_frequency[term] >= min_df and document_frequency[term] <= len(texts) * 0.85
-    ]
-    if len(terms) < 2:
-        return np.empty((len(texts), 0))
-
-    term_index = {term: index for index, term in enumerate(terms)}
-    matrix = np.zeros((len(texts), len(terms)), dtype=float)
-    for row_index, tokens in enumerate(tokenized):
-        counts = Counter(token for token in tokens if token in term_index)
-        for token, count in counts.items():
-            matrix[row_index, term_index[token]] = 1.0 + math.log(count)
-
-    idf = np.log((1 + len(texts)) / (1 + np.array([document_frequency[term] for term in terms]))) + 1.0
-    matrix *= idf
-    norms = np.linalg.norm(matrix, axis=1, keepdims=True)
-    np.divide(matrix, norms, out=matrix, where=norms > 0)
-    return matrix
-
-
-def scale_coordinates(coords: np.ndarray, target_radius: float = 32.0) -> np.ndarray:
-    if coords.size == 0:
-        return coords
-    centered = coords - coords.mean(axis=0, keepdims=True)
-    spread = float(np.percentile(np.abs(centered), 98))
-    if spread <= 0:
-        spread = float(np.max(np.abs(centered)))
-    if spread <= 0:
-        return centered
-    return centered * (target_radius / spread)
-
-
-def pca_positions(matrix: np.ndarray) -> np.ndarray:
-    if matrix.shape[0] == 0:
-        return np.empty((0, 2))
-    if matrix.shape[0] == 1:
-        return np.zeros((1, 2))
-    centered = matrix - matrix.mean(axis=0, keepdims=True)
-    if centered.shape[1] == 0 or not np.any(centered):
-        return np.zeros((matrix.shape[0], 2))
-    _, _, vh = np.linalg.svd(centered, full_matrices=False)
-    n_components = min(2, vh.shape[0])
-    coords = centered @ vh[:n_components].T
-    if n_components < 2:
-        coords = np.column_stack([coords[:, 0], np.zeros(matrix.shape[0])])
-    return coords
-
-
-def reduced_positions(rows: list[dict[str, str]]) -> np.ndarray:
-    texts = [row_text(row) for row in rows]
-    if len(texts) < 2 or not any(texts):
-        return np.zeros((len(texts), 2))
-
-    matrix = tfidf_matrix(texts)
-    if matrix.shape[1] < 2:
-        coords = np.column_stack([np.arange(len(texts), dtype=float), np.zeros(len(texts))])
-        return scale_coordinates(coords)
-    return scale_coordinates(pca_positions(matrix))
+def load_original_positions() -> dict[str, tuple[float, float]]:
+    if not ORIGINAL_LAYOUT_INPUT.exists():
+        return {}
+    with ORIGINAL_LAYOUT_INPUT.open(newline="", encoding="utf-8") as handle:
+        rows = csv.DictReader(handle)
+        return {
+            clean(row.get("source_url")): (
+                safe_float(row.get("map_x")),
+                safe_float(row.get("map_y")),
+            )
+            for row in rows
+            if clean(row.get("source_url"))
+        }
 
 
 def main() -> None:
@@ -206,11 +97,11 @@ def main() -> None:
         if cluster not in cluster_order:
             cluster_order.append(cluster)
 
-    positions = reduced_positions(rows)
+    original_positions = load_original_positions()
     existing_descriptions = load_existing_descriptions()
 
     records = []
-    for index, row in enumerate(rows):
+    for row in rows:
         cluster = clean(row["cluster"]) or "Unclustered"
 
         year = safe_year(row["year"])
@@ -218,7 +109,7 @@ def main() -> None:
         roles = split_roles(row["protagonist_role"])
         url = clean(row["url"])
         description = existing_descriptions.get(url) or clean(row["description"])
-        x, y = positions[index]
+        x, y = original_positions.get(url, (0.0, 0.0))
 
         records.append(
             {
