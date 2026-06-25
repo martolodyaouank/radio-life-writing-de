@@ -3,6 +3,7 @@
   if (!payload || !Array.isArray(payload.records)) return;
 
   const records = payload.records;
+  const programmeCount = 566;
   const colors = payload.clusterColors || {};
   const clusters = Object.keys(colors).filter((cluster) => records.some((record) => record.cluster === cluster));
   const sources = Array.from(new Set(records.map((record) => record.source).filter(Boolean))).sort();
@@ -36,17 +37,22 @@
 
   function setHeroMetrics() {
     const values = [
-      [records.length, "curated map entries"],
-      [clusters.length, "semantic clusters"],
-      [sources.length, "source collections"],
-      [yearMax - yearMin + 1, "years covered"],
+      { count: programmeCount, label: "programmes" },
+      { text: `${yearMin}-${yearMax}`, label: "broadcast years" },
+      { count: clusters.length, label: "semantic clusters" },
     ];
     document.querySelectorAll(".hero-metrics div").forEach((item, index) => {
       const strong = item.querySelector("strong");
       const span = item.querySelector("span");
       if (!strong || !span || !values[index]) return;
-      strong.dataset.count = String(values[index][0]);
-      span.textContent = values[index][1];
+      if (Number.isFinite(values[index].count)) {
+        strong.dataset.count = String(values[index].count);
+        strong.textContent = "0";
+      } else {
+        delete strong.dataset.count;
+        strong.textContent = values[index].text;
+      }
+      span.textContent = values[index].label;
     });
   }
 
@@ -93,11 +99,6 @@
           </div>
         </div>
         <div class="cluster-tiles">${clusterTiles}</div>
-      </div>
-      <div class="stat-cards">
-        <div class="stat-card"><b>${records.length}</b><span>map records</span></div>
-        <div class="stat-card"><b>${yearMin}-${yearMax}</b><span>broadcast years</span></div>
-        <div class="stat-card"><b>${clusters.length}</b><span>active clusters</span></div>
       </div>
     `;
   }
