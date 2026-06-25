@@ -88,12 +88,10 @@
             <p class="triage-caption">curated entries in the semantic map after removing the non-life-writing item.</p>
           </div>
           <div>
-            <span class="panel-kicker">Source collections</span>
             <h3 class="panel-title">Where the curated map records come from</h3>
             <div class="triage-source">${sourceRows}</div>
           </div>
         </div>
-        <span class="panel-kicker">Semantic clusters</span>
         <div class="cluster-tiles">${clusterTiles}</div>
       </div>
       <div class="stat-cards">
@@ -139,7 +137,6 @@
       detail.innerHTML = `
         <div class="panel-head">
           <div>
-            <span class="panel-kicker">Selected cluster</span>
             <h3 class="panel-title">${escapeHtml(stat.cluster)}</h3>
             <p class="panel-note">${escapeHtml(sourceText || "No source split available")}</p>
           </div>
@@ -198,7 +195,6 @@
       <div class="panel-pad">
         <div class="panel-head">
           <div>
-            <span class="panel-kicker">Stacked by source</span>
             <h3 class="panel-title">Each row sums to one cluster</h3>
           </div>
           <div class="chip-row">${sources.map((source) => `<span><i class="source-dot" style="background:${sourcePalette[source] || "#8693AC"}"></i>${escapeHtml(source)}</span>`).join("")}</div>
@@ -217,7 +213,6 @@
       <div class="panel-pad">
         <div class="panel-head">
           <div>
-            <span class="panel-kicker">Form families</span>
             <h3 class="panel-title">Grouped from map genres</h3>
           </div>
         </div>
@@ -250,7 +245,6 @@
       <div class="panel-pad" style="--cols:${tags.length}">
         <div class="panel-head">
           <div>
-            <span class="panel-kicker">Life-focus matrix</span>
             <h3 class="panel-title">Counts in the top shared life-focus tags</h3>
           </div>
         </div>
@@ -277,7 +271,6 @@
       <div class="duration-viz">
         <div class="duration-controls">
           <div>
-            <span class="panel-kicker">Matched duration metadata</span>
             <h3 class="panel-title">${durationRecords.length} of ${durationPayload.mapRecords || records.length} map records</h3>
           </div>
           <div class="chip-row" data-duration-clusters></div>
@@ -387,7 +380,6 @@
       <div class="panel-pad">
         <div class="panel-head">
           <div>
-            <span class="panel-kicker">Decades</span>
             <h3 class="panel-title">${decades[0]}s to ${decades[decades.length - 1]}s</h3>
           </div>
         </div>

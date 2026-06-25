@@ -50,7 +50,6 @@ main{overflow-x:hidden}
 .panel-pad{padding:28px}
 .panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:28px;padding-bottom:18px;border-bottom:1px solid rgba(38,50,76,.12)}
 .panel-head>div:first-child{flex:1 1 100%;min-width:0}
-.panel-kicker{display:block;color:#C25B72;font-size:.66rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase;margin-bottom:7px}
 .panel-title{margin:0;color:#26324C;font-family:var(--display);font-weight:600;font-size:1.5rem;line-height:1.12;letter-spacing:.005em}
 .panel-note{margin-top:7px;color:#515970;font-family:var(--sans);font-size:.95rem;line-height:1.4}
 .chip-row{display:flex;flex-wrap:wrap;gap:9px 16px;align-items:center}
