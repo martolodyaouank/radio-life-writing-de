@@ -43,6 +43,7 @@ main{overflow-x:hidden}
 .method-grid h3{margin:0 0 10px;color:#26324C;font-family:var(--display);font-weight:600;font-size:1.35rem;line-height:1.12}
 .method-grid p{color:#515970;font-family:var(--sans);font-size:.98rem;line-height:1.55}
 .graph-section.section-pad,.graph-grid.section-pad{padding-top:clamp(28px,3vw,40px)}
+.graph-section.duration-section.section-pad{padding-top:calc(clamp(44px,7vw,110px) + clamp(28px,3vw,40px))}
 .graph-section>.section-copy,.graph-grid>.section-copy{width:100%;max-width:none;text-align:left;margin:0 0 46px}
 .graph-figure{margin:0}
 .graph-figure img{display:block;width:100%;height:auto;border:1.5px solid rgba(38,50,76,.14);background:#fff}
