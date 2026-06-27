@@ -81,7 +81,7 @@
     const clusterTiles = clusterCounts.map(([cluster, count], index) => `
       <article class="cluster-tile" title="${escapeHtml(cluster)}: ${count} records">
         <i style="background:${colors[cluster] || pickColor(index)}"></i>
-        <strong>${escapeHtml(cluster)}</strong>
+        <strong data-short-label="${escapeAttr(shortClusterLabel(cluster))}">${escapeHtml(cluster)}</strong>
         <b>${count}</b>
         <span>${((count / records.length) * 100).toFixed(1)}% of map</span>
       </article>
@@ -230,7 +230,7 @@
         const width = `${((value / max) * 100).toFixed(2)}%`;
         return `<span class="profile-cell" style="color:${colors[cluster] || "#8693AC"}" title="${escapeHtml(tag)}: ${value} in ${escapeHtml(cluster)}"><i data-fill="${width}"></i><span>${value || ""}</span></span>`;
       }).join("");
-      return `<div class="profile-row"><strong title="${escapeHtml(cluster)}">${escapeHtml(cluster)}</strong>${cells}</div>`;
+      return `<div class="profile-row"><strong title="${escapeHtml(cluster)}" data-short-label="${escapeAttr(shortClusterLabel(cluster))}">${escapeHtml(cluster)}</strong>${cells}</div>`;
     }).join("");
     host.innerHTML = `
       <div class="panel-pad" style="--cols:${tags.length}">
@@ -279,8 +279,8 @@
     chart.appendChild(tooltip);
 
     clusterHost.innerHTML = clusters.filter((cluster) => durationRecords.some((record) => record.cluster === cluster)).map((cluster) => `
-      <button type="button" data-duration-cluster="${escapeHtml(cluster)}" aria-pressed="true">
-        <i style="background:${colors[cluster] || "#8693AC"}"></i>${escapeHtml(cluster)}
+      <button type="button" data-duration-cluster="${escapeHtml(cluster)}" aria-pressed="true" data-short-label="${escapeAttr(shortClusterLabel(cluster))}">
+        <i style="background:${colors[cluster] || "#8693AC"}"></i><span>${escapeHtml(cluster)}</span>
       </button>
     `).join("");
 
@@ -302,7 +302,7 @@
         }).join("");
         return `
           <div class="duration-row">
-            <span class="duration-label">${escapeHtml(cluster)}</span>
+            <span class="duration-label" data-short-label="${escapeAttr(shortClusterLabel(cluster))}">${escapeHtml(cluster)}</span>
             <span class="duration-whisker" style="left:${scaleDuration(q10, maxDuration)}%;width:${Math.max(0, scaleDuration(q90, maxDuration) - scaleDuration(q10, maxDuration)).toFixed(2)}%"></span>
             <span class="duration-box" style="left:${scaleDuration(q1, maxDuration)}%;width:${Math.max(0.8, scaleDuration(q3, maxDuration) - scaleDuration(q1, maxDuration)).toFixed(2)}%"></span>
             <span class="duration-median" style="left:${scaleDuration(med, maxDuration)}%"></span>
@@ -446,6 +446,10 @@
 
   function pickColor(index) {
     return ["#26324C", "#C25B72", "#4747A1", "#5D9BB5", "#C29A45", "#D07A56", "#6F8FC9"][index % 7];
+  }
+
+  function shortClusterLabel(label) {
+    return label === "Autobiographical lives" ? "A/B lives" : label;
   }
 
   function quantile(values, p) {
