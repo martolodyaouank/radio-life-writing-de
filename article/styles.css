@@ -42,12 +42,13 @@ main{overflow-x:hidden}
 .method-grid article{min-width:0;background:#fff;padding:22px 20px 24px}
 .method-grid h3{margin:0 0 10px;color:#26324C;font-family:var(--display);font-weight:600;font-size:1.35rem;line-height:1.12}
 .method-grid p{color:#515970;font-family:var(--sans);font-size:.98rem;line-height:1.55}
+.graph-section.section-pad,.graph-grid.section-pad{padding-top:clamp(44px,7vw,72px)}
 .graph-section>.section-copy,.graph-grid>.section-copy{width:100%;max-width:none;text-align:left;margin:0 0 46px}
 .graph-figure{margin:0}
 .graph-figure img{display:block;width:100%;height:auto;border:1.5px solid rgba(38,50,76,.14);background:#fff}
 .graph-grid.section-pad{padding-bottom:0}
 .graph-grid.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px;align-items:stretch}
-.graph-grid.two.section-pad{padding-top:clamp(36px,5vw,72px)}
+.graph-grid.two.section-pad{padding-top:clamp(44px,7vw,72px)}
 .graph-grid.two article{display:flex;flex-direction:column;min-width:0}
 .graph-grid.two .section-copy{width:100%;max-width:none;min-height:0;display:flex;flex-direction:column;justify-content:flex-end;text-align:left;margin:0;padding:clamp(24px,3.8vw,42px) 0}
 .graph-grid.two .interactive-panel{flex:1;display:flex;flex-direction:column}
