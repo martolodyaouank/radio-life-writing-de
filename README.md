@@ -69,7 +69,7 @@ The broad scrape and analysis path is:
 
 Important generated analysis outputs include:
 
-- `data/processed/german_radio_biographical_candidates.csv`
+- `data/processed/analysis_tables/german_candidates_enriched_all.csv`
 - `data/processed/german_scrape_summary.json`
 - `data/processed/analysis_tables/core_semantic_enriched.csv`
 - `data/processed/analysis_tables/semantic_cluster_terms.csv`
