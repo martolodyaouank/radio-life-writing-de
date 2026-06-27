@@ -335,7 +335,7 @@
       highlight.visible = false;
       tooltip.hidden = true;
       tooltip.classList.remove("is-pinned");
-      yearReadout.textContent = "Hover a point";
+      yearReadout.textContent = "";
       return;
     }
     renderCard(index, event, false);

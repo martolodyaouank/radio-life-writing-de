@@ -29,6 +29,8 @@ main{overflow-x:hidden}
 .lede{font-family:var(--sans);font-weight:300;font-size:clamp(22px,3vw,36px);line-height:1.4;margin:0 0 1em;letter-spacing:-.005em}
 .lede span{color:#C25B72}
 .intro p:not(.lede),.section-copy p{font-family:var(--sans);font-weight:400;font-size:clamp(16px,1.7vw,19px);line-height:1.65;color:#515970}
+.intro ul{max-width:720px;margin:16px auto 18px;padding-left:24px;text-align:left;color:#515970;font-size:clamp(16px,1.7vw,19px);line-height:1.65}
+.intro li{margin:5px 0}
 .section-copy{max-width:820px;margin:0 auto 46px;text-align:center}
 .section-copy h2{font-family:var(--display);font-weight:600;font-size:clamp(34px,5vw,64px);line-height:1.04;letter-spacing:-.005em;margin:0 0 16px;color:#26324C}
 .method-section{padding-top:0}
@@ -59,6 +61,7 @@ main{overflow-x:hidden}
 .panel-title{margin:0;color:#26324C;font-family:var(--display);font-weight:600;font-size:1.5rem;line-height:1.12;letter-spacing:.005em}
 .panel-note{margin-top:7px;color:#515970;font-family:var(--sans);font-size:.95rem;line-height:1.4}
 .chip-row{display:flex;flex-wrap:wrap;gap:9px 16px;align-items:center}
+.panel-chip-row{margin-bottom:28px}
 .chip-row>span{display:inline-flex;align-items:center;gap:8px;font-size:.8rem;font-weight:700;color:#515970}
 .chip-row button,.mini-select{min-height:32px;border:1px solid rgba(38,50,76,.2);background:#fff;color:#26324C;font:inherit;font-size:.78rem;font-weight:700;cursor:pointer;border-radius:3px}
 .chip-row button{display:inline-flex;align-items:center;gap:8px;padding:6px 11px}
@@ -180,6 +183,7 @@ main{overflow-x:hidden}
 .footer>div:first-child{max-width:1180px}
 .footer strong{font-family:var(--display);font-weight:600;font-size:30px;color:#26324C}
 .footer p{font-family:var(--sans);font-weight:400;font-size:12px;color:#8693AC;line-height:1.7;margin:12px 0 0}
+.footer-radio img{display:block;width:clamp(76px,12vw,140px);height:auto}
 .eq{display:flex;gap:5px;align-items:flex-end;height:40px}
 .eq span{width:6px;height:14px;border-radius:3px;animation:eq 1.2s ease-in-out infinite}
 .eq span:nth-child(1){background:#4747A1}.eq span:nth-child(2){background:#C25B72;animation-delay:.15s}.eq span:nth-child(3){background:#5D9BB5;animation-delay:.3s}.eq span:nth-child(4){background:#8A6FB0;animation-delay:.45s}.eq span:nth-child(5){background:#3E6F8E;animation-delay:.6s}.eq span:nth-child(6){background:#E0896F;animation-delay:.75s}

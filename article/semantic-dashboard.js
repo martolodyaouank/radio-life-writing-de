@@ -94,7 +94,7 @@
             <p class="triage-caption">visible entries after modeling 806 high- and medium-confidence candidates and applying the curated map layer.</p>
           </div>
           <div>
-            <h3 class="panel-title">Where the curated map records come from</h3>
+            <h3 class="panel-title">Where the records come from</h3>
             <div class="triage-source">${sourceRows}</div>
           </div>
         </div>
@@ -194,12 +194,7 @@
     }).join("");
     host.innerHTML = `
       <div class="panel-pad">
-        <div class="panel-head">
-          <div>
-            <h3 class="panel-title">Each row sums to one cluster</h3>
-          </div>
-          <div class="chip-row">${sources.map((source) => `<span><i class="source-dot" style="background:${sourcePalette[source] || "#8693AC"}"></i>${escapeHtml(source)}</span>`).join("")}</div>
-        </div>
+        <div class="chip-row panel-chip-row">${sources.map((source) => `<span><i class="source-dot" style="background:${sourcePalette[source] || "#8693AC"}"></i>${escapeHtml(source)}</span>`).join("")}</div>
         <div class="bar-stack">${rows}</div>
       </div>
     `;
@@ -212,11 +207,6 @@
     const max = families[0]?.[1] || 1;
     host.innerHTML = `
       <div class="panel-pad">
-        <div class="panel-head">
-          <div>
-            <h3 class="panel-title">Grouped from map genres</h3>
-          </div>
-        </div>
         <div class="bar-stack">
           ${families.map(([label, count], index) => barRow({ label, count, max, color: pickColor(index), delay: index })).join("")}
         </div>
@@ -244,11 +234,6 @@
     }).join("");
     host.innerHTML = `
       <div class="panel-pad" style="--cols:${tags.length}">
-        <div class="panel-head">
-          <div>
-            <h3 class="panel-title">Counts in the top shared life-focus tags</h3>
-          </div>
-        </div>
         <div class="profile-grid">
           <div class="profile-head"><span></span>${tags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join("")}</div>
           ${rows}
@@ -382,11 +367,6 @@
     }).join("");
     host.innerHTML = `
       <div class="panel-pad">
-        <div class="panel-head">
-          <div>
-            <h3 class="panel-title">${decades[0]}s to ${decades[decades.length - 1]}s</h3>
-          </div>
-        </div>
         <div class="timeline-bars">${rows}</div>
       </div>
     `;
