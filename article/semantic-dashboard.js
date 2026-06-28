@@ -495,7 +495,7 @@
       {
         name: "Witnesses / displaced lives",
         color: "#6F8FC9",
-        roles: ["Holocaust survivor", "Holocaust victim", "war survivor", "war witness", "migrant", "immigrant", "refugee", "prisoner", "disabled person", "patient", "drug user", "suspect", "criminal"],
+        roles: ["Holocaust survivor", "Holocaust victim", "war survivor", "war witness", "victim", "survivor", "witness", "migrant", "immigrant", "refugee", "prisoner", "disabled person", "patient", "drug user", "suspect", "criminal"],
       },
       {
         name: "Scholars / experts",
