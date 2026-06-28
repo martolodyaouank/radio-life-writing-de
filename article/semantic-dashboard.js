@@ -18,6 +18,7 @@
 
   setHeroMetrics();
   renderSubjectSummary();
+  renderLifeFocusDecade();
   renderCorpusTriage();
   renderClusterExplorer();
   renderSourceMix();
@@ -63,6 +64,61 @@
       .filter(([label]) => label && label !== "not stated")
       .slice(0, 8);
     host.innerHTML = top.map(([label, count]) => `<span><b>${count}</b>${escapeHtml(label)}</span>`).join("");
+  }
+
+  function renderLifeFocusDecade() {
+    const host = document.querySelector("[data-life-focus-decade]");
+    if (!host) return;
+    const groups = lifeFocusGroups();
+    const decades = Array.from(new Set(records.map((record) => decade(record.year)).filter(Boolean))).sort((a, b) => a - b);
+    const matrix = groups.map((group) => {
+      const counts = new Map(decades.map((item) => [item, 0]));
+      records.forEach((record) => {
+        const item = decade(record.year);
+        if (!item) return;
+        const roles = new Set(record.whoAbout || []);
+        if (group.roles.some((role) => roles.has(role))) {
+          counts.set(item, (counts.get(item) || 0) + 1);
+        }
+      });
+      return { ...group, counts };
+    });
+    const max = Math.max(...matrix.flatMap((group) => decades.map((item) => group.counts.get(item) || 0)), 1);
+    const header = decades.map((item) => `<span>${item}s</span>`).join("");
+    const rows = matrix.map((group) => {
+      const cells = decades.map((item) => {
+        const value = group.counts.get(item) || 0;
+        const opacity = value ? Math.max(0.16, Math.min(0.88, value / max)) : 0;
+        const roleList = group.roles.join(", ");
+        return `
+          <span class="life-focus-cell" style="background:${value ? hexToRgba(group.color, opacity) : "rgba(38,50,76,.045)"}" title="${escapeAttr(group.name)} · ${item}s: ${value} records · Roles: ${escapeAttr(roleList)}">
+            ${value || ""}
+          </span>
+        `;
+      }).join("");
+      return `
+        <div class="life-focus-row">
+          <strong title="${escapeAttr(group.roles.join(", "))}">${escapeHtml(group.name)}</strong>
+          ${cells}
+        </div>
+      `;
+    }).join("");
+
+    host.innerHTML = `
+      <div class="panel-pad life-focus-pad" style="--life-focus-cols:${decades.length}">
+        <div class="panel-head life-focus-head">
+          <div>
+            <h3 class="panel-title">Life Focus by Decade*</h3>
+            <p class="panel-note">Merged protagonist roles from the semantic map, grouped to make broad patterns visible over time.</p>
+          </div>
+        </div>
+        <div class="life-focus-heatmap" aria-label="Life focus by decade heatmap">
+          <div class="life-focus-header"><span></span>${header}</div>
+          ${rows}
+        </div>
+        <p class="life-focus-foot">*A single programme may appear in several groups when it has multiple protagonist-role tags.</p>
+      </div>
+    `;
   }
 
   function renderCorpusTriage() {
@@ -384,6 +440,66 @@
       focuses: countMany(subset.flatMap((record) => record.whoAbout || [])).filter(([label]) => label && label !== "not stated"),
       forms: countBy(subset, (record) => record.form || record.genre || "Unknown"),
     };
+  }
+
+  function lifeFocusGroups() {
+    return [
+      {
+        name: "Women / gendered lives",
+        color: "#C25B72",
+        roles: ["woman", "mother", "salonniere"],
+      },
+      {
+        name: "Writers / literary lives",
+        color: "#4747A1",
+        roles: ["author", "poet", "playwright", "diarist", "screenwriter", "literary subject"],
+      },
+      {
+        name: "Artists / performers",
+        color: "#D07A56",
+        roles: ["artist", "painter", "actor", "performer", "director", "filmmaker", "photographer", "singer", "artist collective", "performance artist", "set designer", "humorist"],
+      },
+      {
+        name: "Music / sound makers",
+        color: "#5D9BB5",
+        roles: ["musician", "composer", "conductor", "sound artist", "radio artist", "radio producer", "sound engineer"],
+      },
+      {
+        name: "Political / public lives",
+        color: "#C29A45",
+        roles: ["politician", "activist", "political prisoner", "resistance fighter", "official", "political adviser", "military"],
+      },
+      {
+        name: "Ordinary / working lives",
+        color: "#4F8F77",
+        roles: ["ordinary person", "worker", "student", "tenant", "resident", "vendor", "street vendor", "professional", "craftsperson", "working-class family", "unhoused person", "landlord", "helper"],
+      },
+      {
+        name: "Family / intimate relations",
+        color: "#8A6FB0",
+        roles: ["family", "family member", "parent", "child", "mother", "friend"],
+      },
+      {
+        name: "Witnesses / displaced lives",
+        color: "#6F8FC9",
+        roles: ["Holocaust survivor", "Holocaust victim", "war survivor", "war witness", "migrant", "immigrant", "refugee", "prisoner", "disabled person", "patient", "drug user", "suspect", "criminal"],
+      },
+      {
+        name: "Scholars / experts",
+        color: "#3E6F8E",
+        roles: ["scholar", "scientist", "philosopher", "doctor", "physician", "psychologist", "teacher", "journalist", "lawyer", "engineer", "programmer", "publisher", "critic", "chef", "businessperson", "entrepreneur", "corporate executive", "manager", "medic", "explorer", "astronaut", "aviator"],
+      },
+      {
+        name: "Collective lives",
+        color: "#8693AC",
+        roles: ["collective", "ensemble"],
+      },
+      {
+        name: "Fictional / symbolic / places",
+        color: "#26324C",
+        roles: ["fictional character", "fictional setting", "place", "nonhuman subject", "object", "abstract concept", "cultural form", "cultural object", "musical work", "institution", "production", "sound phenomenon", "bodily sense"],
+      },
+    ];
   }
 
   function exemplarCard(record) {
