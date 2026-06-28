@@ -90,9 +90,21 @@
         const value = group.counts.get(item) || 0;
         const opacity = value ? Math.max(0.16, Math.min(0.88, value / max)) : 0;
         const roleList = group.roles.join(", ");
+        const recordList = value ? matchingLifeFocusRecords(group, item) : [];
+        const programmeList = recordList.map((record) => programmeLink(record)).join("");
+        const popover = value ? `
+          <span class="life-focus-popover" role="dialog" aria-label="${escapeAttr(group.name)} ${item}s programmes" hidden>
+            <span class="life-focus-popover-head">
+              <strong>${escapeHtml(group.name)}</strong>
+              <span>${item}s · ${value} programme${value === 1 ? "" : "s"}</span>
+            </span>
+            <span class="life-focus-popover-list">${programmeList}</span>
+          </span>
+        ` : "";
         return `
-          <span class="life-focus-cell" style="background:${value ? hexToRgba(group.color, opacity) : "rgba(38,50,76,.045)"}" title="${escapeAttr(group.name)} · ${item}s: ${value} records · Roles: ${escapeAttr(roleList)}">
+          <span class="life-focus-cell${value ? "" : " is-empty"}" role="${value ? "button" : "presentation"}" ${value ? "tabindex=\"0\"" : ""} style="background:${value ? hexToRgba(group.color, opacity) : "rgba(38,50,76,.045)"}" title="${escapeAttr(group.name)} · ${item}s: ${value} records · Roles: ${escapeAttr(roleList)}">
             ${value || ""}
+            ${popover}
           </span>
         `;
       }).join("");
@@ -119,6 +131,7 @@
         <p class="life-focus-foot">*A single programme may appear in several groups when it has multiple protagonist-role tags.</p>
       </div>
     `;
+    setupLifeFocusPopovers(host);
   }
 
   function renderCorpusTriage() {
@@ -500,6 +513,118 @@
         roles: ["fictional character", "fictional setting", "place", "nonhuman subject", "object", "abstract concept", "cultural form", "cultural object", "musical work", "institution", "production", "sound phenomenon", "bodily sense"],
       },
     ];
+  }
+
+  function matchingLifeFocusRecords(group, item) {
+    return records
+      .filter((record) => decade(record.year) === item)
+      .filter((record) => {
+        const roles = new Set(record.whoAbout || []);
+        return group.roles.some((role) => roles.has(role));
+      })
+      .sort((a, b) => Number(a.year) - Number(b.year) || String(a.title || "").localeCompare(String(b.title || "")));
+  }
+
+  function programmeLink(record) {
+    const url = String(record.url || "").trim();
+    const meta = [record.year, record.source].filter(Boolean).join(" · ");
+    const title = escapeHtml(record.title || "Untitled programme");
+    const metaText = meta ? `<span>${escapeHtml(meta)}</span>` : "";
+    if (/^https?:\/\//i.test(url)) {
+      return `<a href="${escapeAttr(url)}" target="_blank" rel="noopener noreferrer"><strong>${title}</strong>${metaText}</a>`;
+    }
+    return `<span class="life-focus-programme"><strong>${title}</strong>${metaText}</span>`;
+  }
+
+  function setupLifeFocusPopovers(host) {
+    let pinnedCell = null;
+
+    function setOpen(cell, open, pinned = false) {
+      const popover = cell?.querySelector(".life-focus-popover");
+      if (!popover) return;
+      popover.hidden = !open;
+      cell.classList.toggle("is-open", open);
+      cell.classList.toggle("is-pinned", Boolean(pinned));
+      if (pinned) pinnedCell = cell;
+      else if (pinnedCell === cell) pinnedCell = null;
+      if (open) positionLifeFocusPopover(cell, popover, host);
+    }
+
+    function closePinned() {
+      if (!pinnedCell) return;
+      setOpen(pinnedCell, false);
+      pinnedCell = null;
+    }
+
+    host.addEventListener("pointerover", (event) => {
+      const cell = event.target.closest(".life-focus-cell:not(.is-empty)");
+      if (!cell || pinnedCell || cell.contains(event.relatedTarget)) return;
+      setOpen(cell, true);
+    });
+
+    host.addEventListener("pointerout", (event) => {
+      const cell = event.target.closest(".life-focus-cell:not(.is-empty)");
+      if (!cell || pinnedCell === cell || cell.contains(event.relatedTarget)) return;
+      setOpen(cell, false);
+    });
+
+    host.addEventListener("click", (event) => {
+      const link = event.target.closest(".life-focus-popover a");
+      if (link) return;
+      if (event.target.closest(".life-focus-popover")) return;
+      const cell = event.target.closest(".life-focus-cell:not(.is-empty)");
+      if (!cell) {
+        closePinned();
+        return;
+      }
+      event.preventDefault();
+      if (pinnedCell === cell) {
+        closePinned();
+        return;
+      }
+      closePinned();
+      setOpen(cell, true, true);
+    });
+
+    host.addEventListener("keydown", (event) => {
+      if (!["Enter", " "].includes(event.key)) return;
+      const cell = event.target.closest(".life-focus-cell:not(.is-empty)");
+      if (!cell) return;
+      event.preventDefault();
+      if (pinnedCell === cell) closePinned();
+      else {
+        closePinned();
+        setOpen(cell, true, true);
+      }
+    });
+
+    document.addEventListener("click", (event) => {
+      if (!pinnedCell || host.contains(event.target)) return;
+      closePinned();
+    });
+
+    window.addEventListener("resize", () => {
+      const openCell = pinnedCell || host.querySelector(".life-focus-cell.is-open");
+      const popover = openCell?.querySelector(".life-focus-popover");
+      if (openCell && popover && !popover.hidden) positionLifeFocusPopover(openCell, popover, host);
+    });
+  }
+
+  function positionLifeFocusPopover(cell, popover, host) {
+    const cellRect = cell.getBoundingClientRect();
+    const width = Math.min(340, window.innerWidth - 44);
+    popover.style.width = `${width}px`;
+    popover.style.left = `${Math.max(14, Math.min(window.innerWidth - width - 14, cellRect.left + (cellRect.width / 2) - (width / 2)))}px`;
+    popover.style.top = `${cellRect.bottom + 8}px`;
+    popover.classList.remove("is-above");
+
+    window.requestAnimationFrame(() => {
+      const popoverRect = popover.getBoundingClientRect();
+      if (popoverRect.bottom > window.innerHeight - 12 && cellRect.top > popoverRect.height + 18) {
+        popover.style.top = `${Math.max(12, cellRect.top - popoverRect.height - 8)}px`;
+        popover.classList.add("is-above");
+      }
+    });
   }
 
   function exemplarCard(record) {

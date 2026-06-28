@@ -66,7 +66,21 @@ main{overflow-x:hidden}
 .life-focus-header span{display:flex;align-items:flex-end;justify-content:center;min-height:34px;padding:0 2px 7px;color:#515970;font-size:.68rem;font-weight:800;line-height:1.1}
 .life-focus-header span:not(:first-child){border-bottom:1px solid rgba(38,50,76,.14)}
 .life-focus-row strong{display:flex;align-items:center;min-width:0;padding-right:8px;color:#26324C;font-size:.82rem;font-weight:800;line-height:1.16;overflow-wrap:break-word}
-.life-focus-cell{display:flex;align-items:center;justify-content:center;min-height:38px;border-radius:3px;color:#26324C;font-size:.76rem;font-weight:900;font-variant-numeric:tabular-nums}
+.life-focus-cell{position:relative;display:flex;align-items:center;justify-content:center;min-height:38px;border:0;border-radius:3px;color:#26324C;font-size:.76rem;font-weight:900;font-variant-numeric:tabular-nums;cursor:pointer;outline:0;transition:box-shadow .16s ease}
+.life-focus-cell:not(.is-empty):hover,.life-focus-cell:not(.is-empty):focus-visible,.life-focus-cell.is-open{box-shadow:inset 0 0 0 2px rgba(38,50,76,.28),0 8px 18px rgba(38,50,76,.12);z-index:6}
+.life-focus-cell.is-pinned{box-shadow:inset 0 0 0 2px #C25B72,0 10px 24px rgba(38,50,76,.16)}
+.life-focus-cell.is-empty{cursor:default}
+.life-focus-popover{position:fixed;z-index:20;width:min(340px,calc(100vw - 44px));max-height:min(360px,calc(100vh - 120px));padding:12px;border:1.5px solid rgba(38,50,76,.18);background:rgba(251,241,237,.98);box-shadow:0 18px 38px rgba(38,50,76,.2);color:#26324C;text-align:left;font-family:var(--sans);font-variant-numeric:normal;cursor:auto;overflow:hidden}
+.life-focus-popover::before{content:"";position:absolute;left:50%;top:-7px;width:12px;height:12px;background:rgba(251,241,237,.98);border-left:1.5px solid rgba(38,50,76,.18);border-top:1.5px solid rgba(38,50,76,.18);transform:translateX(-50%) rotate(45deg)}
+.life-focus-popover.is-above::before{top:auto;bottom:-7px;border:0;border-right:1.5px solid rgba(38,50,76,.18);border-bottom:1.5px solid rgba(38,50,76,.18)}
+.life-focus-popover-head{display:block;margin-bottom:9px;padding-bottom:8px;border-bottom:1px solid rgba(38,50,76,.12)}
+.life-focus-popover-head strong{display:block;color:#26324C;font-size:.92rem;font-weight:900;line-height:1.18}
+.life-focus-popover-head span{display:block;margin-top:3px;color:#515970;font-size:.72rem;font-weight:800;line-height:1.25}
+.life-focus-popover-list{display:grid;gap:7px;max-height:270px;overflow:auto;padding-right:4px}
+.life-focus-popover-list a,.life-focus-programme{display:block;padding:8px 9px;border:1px solid rgba(38,50,76,.1);background:#fff;color:#26324C;text-decoration:none}
+.life-focus-popover-list a:hover,.life-focus-popover-list a:focus-visible{border-color:rgba(194,91,114,.55);color:#C25B72;outline:0}
+.life-focus-popover-list strong{display:block;font-size:.8rem;font-weight:800;line-height:1.2}
+.life-focus-popover-list span{display:block;margin-top:3px;color:#515970;font-size:.66rem;font-weight:800;line-height:1.2}
 .life-focus-foot{margin:10px 0 0;color:#515970;font-family:var(--sans);font-size:.82rem;font-weight:700;line-height:1.45}
 .interactive-panel{position:relative;min-width:0;border:1px solid rgba(38,50,76,.16);background:#fff;color:#26324C;font-family:var(--sans);min-height:180px;overflow:hidden}
 .interactive-panel.compact{min-height:360px}
