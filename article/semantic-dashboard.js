@@ -160,7 +160,7 @@
         <div class="triage-top">
           <div>
             <div class="triage-number">${records.length}</div>
-            <p class="triage-caption">visible entries after modeling 806 high- and medium-confidence candidates and applying the curated map layer.</p>
+            <p class="triage-caption">visible entries; after modelling 806 high- and medium-confidence candidates, 566 entries remain visible.</p>
           </div>
           <div>
             <h3 class="panel-title">Where the records come from</h3>
