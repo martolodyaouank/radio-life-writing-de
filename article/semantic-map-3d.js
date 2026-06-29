@@ -38,6 +38,13 @@
   );
   const clusters = Object.keys(colors);
   const allClusterSet = new Set(clusters);
+  const lifeFocusFilterGroups = lifeFocusGroups()
+    .map((group) => ({
+      ...group,
+      recordCount: records.filter((record) => recordMatchesLifeFocusGroup(record, group)).length,
+    }))
+    .filter((group) => group.recordCount > 0);
+  const lifeFocusGroupByName = new Map(lifeFocusFilterGroups.map((group) => [group.name, group]));
   let activeClusters = new Set(clusters);
   let visibleRecords = records.slice();
 
@@ -175,7 +182,7 @@
     fillSelect(formFilter, "All genres", payload.forms || uniqueValues("form"));
     fillSelect(sourceFilter, "All sources", payload.sources || uniqueValues("source"));
     if (signalFilter) fillSelect(signalFilter, "All signals", payload.signals || uniqueSignals());
-    fillSelect(whoFilter, "All life focuses", payload.whoAbout || uniqueWhoAbout());
+    fillSelect(whoFilter, "All life focuses", lifeFocusFilterGroups.map((group) => group.name));
 
     [yearMinInput, yearMaxInput, formFilter, sourceFilter, signalFilter, whoFilter].filter(Boolean).forEach((control) => {
       control.addEventListener("input", applyFilters);
@@ -212,8 +219,58 @@
     return Array.from(new Set(records.flatMap((record) => record.signals || []))).sort();
   }
 
-  function uniqueWhoAbout() {
-    return Array.from(new Set(records.flatMap((record) => record.whoAbout || []))).sort();
+  function lifeFocusGroups() {
+    return [
+      {
+        name: "Women / gendered lives",
+        roles: ["woman", "mother", "salonniere"],
+      },
+      {
+        name: "Writers / literary lives",
+        roles: ["author", "poet", "playwright", "diarist", "screenwriter", "literary subject"],
+      },
+      {
+        name: "Artists / performers",
+        roles: ["artist", "painter", "actor", "performer", "director", "filmmaker", "photographer", "singer", "artist collective", "performance artist", "set designer", "humorist"],
+      },
+      {
+        name: "Music / sound makers",
+        roles: ["musician", "composer", "conductor", "sound artist", "radio artist", "radio producer", "sound engineer"],
+      },
+      {
+        name: "Political / public lives",
+        roles: ["politician", "activist", "political prisoner", "resistance fighter", "official", "political adviser", "military"],
+      },
+      {
+        name: "Ordinary / working lives",
+        roles: ["ordinary person", "worker", "student", "tenant", "resident", "vendor", "street vendor", "professional", "craftsperson", "working-class family", "unhoused person", "landlord", "helper"],
+      },
+      {
+        name: "Family / intimate relations",
+        roles: ["family", "family member", "parent", "child", "mother", "friend"],
+      },
+      {
+        name: "Witnesses / displaced lives",
+        roles: ["Holocaust survivor", "Holocaust victim", "war survivor", "war witness", "victim", "survivor", "witness", "migrant", "immigrant", "refugee", "prisoner", "disabled person", "patient", "drug user", "suspect", "criminal"],
+      },
+      {
+        name: "Scholars / experts",
+        roles: ["scholar", "scientist", "philosopher", "doctor", "physician", "psychologist", "teacher", "journalist", "lawyer", "engineer", "programmer", "publisher", "critic", "chef", "businessperson", "entrepreneur", "corporate executive", "manager", "medic", "explorer", "astronaut", "aviator"],
+      },
+      {
+        name: "Collective lives",
+        roles: ["collective", "ensemble"],
+      },
+      {
+        name: "Fictional / symbolic / places",
+        roles: ["fictional character", "fictional setting", "place", "nonhuman subject", "object", "abstract concept", "cultural form", "cultural object", "musical work", "institution", "production", "sound phenomenon", "bodily sense"],
+      },
+    ];
+  }
+
+  function recordMatchesLifeFocusGroup(record, group) {
+    const roles = new Set(record.whoAbout || []);
+    return group.roles.some((role) => roles.has(role));
   }
 
   function resetFilters() {
@@ -246,7 +303,7 @@
     const form = formFilter.value;
     const source = sourceFilter.value;
     const signal = signalFilter ? signalFilter.value : "";
-    const who = whoFilter.value;
+    const who = lifeFocusGroupByName.get(whoFilter.value);
     visibleRecords = records.filter((record) => {
       const year = Number(record.year || payload.yearMin);
       return (
@@ -256,7 +313,7 @@
         (!form || record.form === form) &&
         (!source || record.source === source) &&
         (!signal || (record.signals || []).includes(signal)) &&
-        (!who || (record.whoAbout || []).includes(who))
+        (!who || recordMatchesLifeFocusGroup(record, who))
       );
     });
 
